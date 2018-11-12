@@ -1,0 +1,19 @@
+Battery
+Breaks
+Axle
+Fuel Injector
+Piston
+A/C Compressor
+Radiator
+Engine Fan
+Clutch
+Car Jack
+Spare Tire
+Transmission
+Shock Absorbers
+Air filter
+Spark Plug
+Catalytic Converter
+Muffler
+Pressure Gauge
+Alternator
