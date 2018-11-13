@@ -21,7 +21,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Car`("
                "PRIMARY KEY (`plate`),"
                "FOREIGN KEY (`cmodel`) REFERENCES `Car_Model`(`model`))")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS `Car_Part`("
+cursor.execute("CREATE TABLE IF NOT EXISTS `Car_Part`("  # might need price?
                "`trade_name` VARCHAR(30) NOT NULL, "
                "`type` VARCHAR(30) NOT NULL, "
                "`car_model` VARCHAR(30) NOT NULL, "
@@ -35,7 +35,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Provider`("
                "`bank_account` INTEGER NOT NULL,"
                "PRIMARY KEY (`id`))")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS `Car_Part_Price`("
+cursor.execute("CREATE TABLE IF NOT EXISTS `Car_Part_Price`("  # why separate table for prices?
                "`trade_name` VARCHAR(30) NOT NULL, "
                "`pid` INTEGER NOT NULL, "
                "`price` INTEGER NOT NULL, "
@@ -50,9 +50,9 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Deposit`("
 
 cursor.execute("CREATE TABLE IF NOT EXISTS `Charging_Station`("
                "`id` INTEGER NOT NULL, "
-               "`GPS_location` VARCHAR(30) NOT NULL, "
+               "`GPS_location` VARCHAR(30) NOT NULL, "  # not sure it 30 will be enough, need to check it
                "`price_per_charge` INTEGER NOT NULL, "
-               "`no_available_sockets` INTEGER NOT NULL,"
+               "`no_available_sockets` INTEGER NOT NULL,"  # need different structure of it for queries
                "PRIMARY KEY (`id`))")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS `Customer`("
@@ -62,16 +62,16 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Customer`("
                "`email` VARCHAR(30) NOT NULL, "
                "`phone_number` VARCHAR(10),"
                "`bank_account` INTEGER NOT NULL,"
-               "`GPS_Location` VARCHAR(30) NOT NULL,"
+               "`GPS_Location` VARCHAR(30) NOT NULL,"  #?
                "`address` VARCHAR(50) NOT NULL,"
-               "`sid` INTEGER,"
+               "`sid` INTEGER,"  # might rename it to 'nearest_station'? not sure what sid may mean in this table
                "PRIMARY KEY (`id`),"
                "FOREIGN KEY (`sid`) REFERENCES `Charging_Station`(`id`))")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS `Workshop`("
                "`id` INTEGER NOT NULL, "
                "`location` VARCHAR(30) NOT NULL, "
-               "`available_timing` VARCHAR(30) NOT NULL, "                       #-----------------??????????
+               "`available_timing` VARCHAR(30) NOT NULL, " # might be just an integer        #-----------------??????????
                "PRIMARY KEY (`id`))")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS `Plug`("
@@ -81,7 +81,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Plug`("
                "`charging_speed` INTEGER NOT NULL, "
                "PRIMARY KEY (`model`))")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS `Car_Plug`("
+cursor.execute("CREATE TABLE IF NOT EXISTS `Car_Plug`(" # we might not create this table, just add foreign key of Plug to the Car_Model table
                "`cplate` VARCHAR(30) NOT NULL, "
                "`pmodel` VARCHAR(30) NOT NULL, "
                "PRIMARY KEY (`cplate`, `pmodel`),"
@@ -99,16 +99,16 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Rent_Record`("
                "FOREIGN KEY (`cid`) REFERENCES `Customer`(`id`),"
                "FOREIGN KEY (`cplate`) REFERENCES `Car`(`plate`))")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS `has_plug`("
+cursor.execute("CREATE TABLE IF NOT EXISTS `has_plug`("  # maybe rename it?
                "`sid` INTEGER NOT NULL, "
                "`pmodel` VARCHAR(30) NOT NULL, "
                "PRIMARY KEY (`sid`, `pmodel`),"
                "FOREIGN KEY (`sid`) REFERENCES `Charging_Station`(`id`),"
                "FOREIGN KEY (`pmodel`) REFERENCES `Plug`(`model`))")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS `has_car_part`("
+cursor.execute("CREATE TABLE IF NOT EXISTS `has_car_part`(" #?
                "`wid` INTEGER NOT NULL, "
-               "`trade_name` VARCHAR(30) NOT NULL, "
+               "`trade_name` VARCHAR(30) NOT NULL, "  # don't know how it works with weak entity
                "`amount` INTEGER NOT NULL DEFAULT 1, "
                "PRIMARY KEY (`wid`, `trade_name`),"
                "FOREIGN KEY (`wid`) REFERENCES `Workshop`(`id`),"
@@ -117,7 +117,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `has_car_part`("
 cursor.execute("CREATE TABLE IF NOT EXISTS `Order`("
                "`id` INTEGER NOT NULL AUTO_INCREMENT, "
                "`date_time` TIMESTAMP NOT NULL, "
-               "`trade_name` VARCHAR(30) NOT NULL, "
+               "`trade_name` VARCHAR(30) NOT NULL, "  # maybe we will have separate table to car_parts in the order
                "`amount` INTEGER NOT NULL DEFAULT 1,"
                "`wid` INTEGER NOT NULL,"
                "`no_of_transaction` INTEGER NOT NULL,"
@@ -132,7 +132,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Repair_Record`("
                "`date_time` TIMESTAMP NOT NULL, "
                "`wid` INTEGER NOT NULL,"
                "`cplate` VARCHAR(30) NOT NULL,"
-               "`cost` INTEGER NOT NULL DEFAULT 1000, "
+               "`cost` INTEGER NOT NULL DEFAULT 1000, " # do we need defaults for prices?
                "PRIMARY KEY (`id`),"
                "FOREIGN KEY (`wid`) REFERENCES `Workshop`(`id`),"
                "FOREIGN KEY (`cplate`) REFERENCES `Car`(`plate`))")
@@ -142,27 +142,27 @@ cursor.execute("CREATE TABLE IF NOT EXISTS `Charge_Record`("
                "`date_time` TIMESTAMP NOT NULL, "
                "`sid` INTEGER NOT NULL,"
                "`cplate` VARCHAR(30) NOT NULL,"
-               "`price` INTEGER NOT NULL DEFAULT 1000, "
+               "`price` INTEGER NOT NULL DEFAULT 1000, "  #?
                "PRIMARY KEY (`id`),"
                "FOREIGN KEY (`sid`) REFERENCES `Charging_Station`(`id`),"
                "FOREIGN KEY (`cplate`) REFERENCES `Car`(`plate`))")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS `Payment_Record`("
-               "`no_of_transaction` INTEGER NOT NULL AUTO_INCREMENT, "
+               "`no_of_transaction` INTEGER NOT NULL AUTO_INCREMENT, "  #autoincrement?
                "`date_time` TIMESTAMP NOT NULL, "
                "`cid` INTEGER NOT NULL,"
                "`did` INTEGER NOT NULL,"
-               "`price` INTEGER NOT NULL DEFAULT 200, "
+               "`price` INTEGER NOT NULL DEFAULT 200, "  #?
                "PRIMARY KEY (`no_of_transaction`),"
                "FOREIGN KEY (`cid`) REFERENCES `Customer`(`id`),"
                "FOREIGN KEY (`did`) REFERENCES `Deposit`(`id`))")
 
 cursor.execute("CREATE TABLE IF NOT EXISTS `Order_Payment_Record`("
-               "`no_of_transaction` INTEGER NOT NULL AUTO_INCREMENT, "
+               "`no_of_transaction` INTEGER NOT NULL AUTO_INCREMENT, "  #?
                "`date_time` TIMESTAMP NOT NULL, "
                "`pid` INTEGER NOT NULL,"
                "`did` INTEGER NOT NULL,"
-               "`price` INTEGER NOT NULL DEFAULT 5000, "
+               "`price` INTEGER NOT NULL DEFAULT 5000, "  #?
                "PRIMARY KEY (`no_of_transaction`),"
                "FOREIGN KEY (`pid`) REFERENCES `Provider`(`id`),"
                "FOREIGN KEY (`did`) REFERENCES `Deposit`(`id`))")
