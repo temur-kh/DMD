@@ -16,66 +16,94 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Car`
+-- Table structure for table `car_models`
 --
 
-DROP TABLE IF EXISTS `Car`;
+DROP TABLE IF EXISTS `car_models`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Car` (
-  `plate` varchar(30) NOT NULL,
-  `cmodel` varchar(30) NOT NULL,
-  `color` varchar(30) NOT NULL,
-  PRIMARY KEY (`plate`),
-  KEY `cmodel` (`cmodel`),
-  CONSTRAINT `Car_ibfk_1` FOREIGN KEY (`cmodel`) REFERENCES `Car_Model` (`model`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `Car`
---
-
-LOCK TABLES `Car` WRITE;
-/*!40000 ALTER TABLE `Car` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Car` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `Car_Model`
---
-
-DROP TABLE IF EXISTS `Car_Model`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
-CREATE TABLE `Car_Model` (
+CREATE TABLE `car_models` (
   `model` varchar(30) NOT NULL,
   `rent_price` int(11) NOT NULL,
   `charging_capacity` int(11) NOT NULL,
   `pmodel` varchar(30) NOT NULL,
   PRIMARY KEY (`model`),
   KEY `pmodel` (`pmodel`),
-  CONSTRAINT `Car_Model_ibfk_1` FOREIGN KEY (`pmodel`) REFERENCES `Plug` (`model`)
+  CONSTRAINT `car_models_ibfk_1` FOREIGN KEY (`pmodel`) REFERENCES `plugs` (`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Car_Model`
+-- Dumping data for table `car_models`
 --
 
-LOCK TABLES `Car_Model` WRITE;
-/*!40000 ALTER TABLE `Car_Model` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Car_Model` ENABLE KEYS */;
+LOCK TABLES `car_models` WRITE;
+/*!40000 ALTER TABLE `car_models` DISABLE KEYS */;
+/*!40000 ALTER TABLE `car_models` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Car_Part`
+-- Table structure for table `car_part_prices`
 --
 
-DROP TABLE IF EXISTS `Car_Part`;
+DROP TABLE IF EXISTS `car_part_prices`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Car_Part` (
+CREATE TABLE `car_part_prices` (
+  `trade_name` varchar(30) NOT NULL,
+  `pid` int(11) NOT NULL,
+  `price` int(11) NOT NULL,
+  PRIMARY KEY (`trade_name`,`pid`),
+  KEY `pid` (`pid`),
+  CONSTRAINT `car_part_prices_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `providers` (`id`),
+  CONSTRAINT `car_part_prices_ibfk_2` FOREIGN KEY (`trade_name`) REFERENCES `car_parts` (`trade_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `car_part_prices`
+--
+
+LOCK TABLES `car_part_prices` WRITE;
+/*!40000 ALTER TABLE `car_part_prices` DISABLE KEYS */;
+/*!40000 ALTER TABLE `car_part_prices` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `car_part_properties`
+--
+
+DROP TABLE IF EXISTS `car_part_properties`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `car_part_properties` (
+  `wid` int(11) NOT NULL,
+  `trade_name` varchar(30) NOT NULL,
+  `amount` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`wid`,`trade_name`),
+  KEY `trade_name` (`trade_name`),
+  CONSTRAINT `car_part_properties_ibfk_1` FOREIGN KEY (`wid`) REFERENCES `workshops` (`id`),
+  CONSTRAINT `car_part_properties_ibfk_2` FOREIGN KEY (`trade_name`) REFERENCES `car_parts` (`trade_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `car_part_properties`
+--
+
+LOCK TABLES `car_part_properties` WRITE;
+/*!40000 ALTER TABLE `car_part_properties` DISABLE KEYS */;
+/*!40000 ALTER TABLE `car_part_properties` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `car_parts`
+--
+
+DROP TABLE IF EXISTS `car_parts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `car_parts` (
   `trade_name` varchar(30) NOT NULL,
   `type` varchar(30) NOT NULL,
   `car_model` varchar(30) NOT NULL,
@@ -84,49 +112,48 @@ CREATE TABLE `Car_Part` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Car_Part`
+-- Dumping data for table `car_parts`
 --
 
-LOCK TABLES `Car_Part` WRITE;
-/*!40000 ALTER TABLE `Car_Part` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Car_Part` ENABLE KEYS */;
+LOCK TABLES `car_parts` WRITE;
+/*!40000 ALTER TABLE `car_parts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `car_parts` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Car_Part_Price`
+-- Table structure for table `cars`
 --
 
-DROP TABLE IF EXISTS `Car_Part_Price`;
+DROP TABLE IF EXISTS `cars`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Car_Part_Price` (
-  `trade_name` varchar(30) NOT NULL,
-  `pid` int(11) NOT NULL,
-  `price` int(11) NOT NULL,
-  PRIMARY KEY (`trade_name`,`pid`),
-  KEY `pid` (`pid`),
-  CONSTRAINT `Car_Part_Price_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `Provider` (`id`),
-  CONSTRAINT `Car_Part_Price_ibfk_2` FOREIGN KEY (`trade_name`) REFERENCES `Car_Part` (`trade_name`)
+CREATE TABLE `cars` (
+  `plate` varchar(30) NOT NULL,
+  `cmodel` varchar(30) NOT NULL,
+  `color` varchar(30) NOT NULL,
+  PRIMARY KEY (`plate`),
+  KEY `cmodel` (`cmodel`),
+  CONSTRAINT `cars_ibfk_1` FOREIGN KEY (`cmodel`) REFERENCES `car_models` (`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Car_Part_Price`
+-- Dumping data for table `cars`
 --
 
-LOCK TABLES `Car_Part_Price` WRITE;
-/*!40000 ALTER TABLE `Car_Part_Price` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Car_Part_Price` ENABLE KEYS */;
+LOCK TABLES `cars` WRITE;
+/*!40000 ALTER TABLE `cars` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cars` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Charge_Record`
+-- Table structure for table `charge_records`
 --
 
-DROP TABLE IF EXISTS `Charge_Record`;
+DROP TABLE IF EXISTS `charge_records`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Charge_Record` (
+CREATE TABLE `charge_records` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_time` timestamp NOT NULL,
   `sid` int(11) NOT NULL,
@@ -135,79 +162,78 @@ CREATE TABLE `Charge_Record` (
   PRIMARY KEY (`id`),
   KEY `sid` (`sid`),
   KEY `cplate` (`cplate`),
-  CONSTRAINT `Charge_Record_ibfk_1` FOREIGN KEY (`sid`) REFERENCES `Charging_Station` (`id`),
-  CONSTRAINT `Charge_Record_ibfk_2` FOREIGN KEY (`cplate`) REFERENCES `Car` (`plate`)
+  CONSTRAINT `charge_records_ibfk_1` FOREIGN KEY (`sid`) REFERENCES `charging_stations` (`id`),
+  CONSTRAINT `charge_records_ibfk_2` FOREIGN KEY (`cplate`) REFERENCES `cars` (`plate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Charge_Record`
+-- Dumping data for table `charge_records`
 --
 
-LOCK TABLES `Charge_Record` WRITE;
-/*!40000 ALTER TABLE `Charge_Record` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Charge_Record` ENABLE KEYS */;
+LOCK TABLES `charge_records` WRITE;
+/*!40000 ALTER TABLE `charge_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `charge_records` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Charging_Station`
+-- Table structure for table `charging_station_sockets`
 --
 
-DROP TABLE IF EXISTS `Charging_Station`;
+DROP TABLE IF EXISTS `charging_station_sockets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Charging_Station` (
+CREATE TABLE `charging_station_sockets` (
+  `station_id` int(11) NOT NULL,
+  `no_of_available_sockets` int(11) NOT NULL,
+  `date_time` timestamp NOT NULL,
+  PRIMARY KEY (`station_id`),
+  CONSTRAINT `charging_station_sockets_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `charging_stations` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `charging_station_sockets`
+--
+
+LOCK TABLES `charging_station_sockets` WRITE;
+/*!40000 ALTER TABLE `charging_station_sockets` DISABLE KEYS */;
+/*!40000 ALTER TABLE `charging_station_sockets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `charging_stations`
+--
+
+DROP TABLE IF EXISTS `charging_stations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `charging_stations` (
   `id` int(11) NOT NULL,
   `GPS_location` varchar(30) NOT NULL,
   `price_per_charge` int(11) NOT NULL,
-  `no_available_sockets` int(11) NOT NULL,
+  `total_no_of_sockets` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Charging_Station`
+-- Dumping data for table `charging_stations`
 --
 
-LOCK TABLES `Charging_Station` WRITE;
-/*!40000 ALTER TABLE `Charging_Station` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Charging_Station` ENABLE KEYS */;
+LOCK TABLES `charging_stations` WRITE;
+/*!40000 ALTER TABLE `charging_stations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `charging_stations` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Charging_Station_Plugs`
+-- Table structure for table `customers`
 --
 
-DROP TABLE IF EXISTS `Charging_Station_Plugs`;
+DROP TABLE IF EXISTS `customers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Charging_Station_Plugs` (
-  `sid` int(11) NOT NULL,
-  `pmodel` varchar(30) NOT NULL,
-  PRIMARY KEY (`sid`,`pmodel`),
-  KEY `pmodel` (`pmodel`),
-  CONSTRAINT `Charging_Station_Plugs_ibfk_1` FOREIGN KEY (`sid`) REFERENCES `Charging_Station` (`id`),
-  CONSTRAINT `Charging_Station_Plugs_ibfk_2` FOREIGN KEY (`pmodel`) REFERENCES `Plug` (`model`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `Charging_Station_Plugs`
---
-
-LOCK TABLES `Charging_Station_Plugs` WRITE;
-/*!40000 ALTER TABLE `Charging_Station_Plugs` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Charging_Station_Plugs` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `Customer`
---
-
-DROP TABLE IF EXISTS `Customer`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
-CREATE TABLE `Customer` (
+CREATE TABLE `customers` (
   `id` int(11) NOT NULL,
   `username` varchar(30) NOT NULL,
   `full_name` varchar(30) NOT NULL,
@@ -219,27 +245,27 @@ CREATE TABLE `Customer` (
   `nearest_station` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `nearest_station` (`nearest_station`),
-  CONSTRAINT `Customer_ibfk_1` FOREIGN KEY (`nearest_station`) REFERENCES `Charging_Station` (`id`)
+  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`nearest_station`) REFERENCES `charging_stations` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Customer`
+-- Dumping data for table `customers`
 --
 
-LOCK TABLES `Customer` WRITE;
-/*!40000 ALTER TABLE `Customer` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Customer` ENABLE KEYS */;
+LOCK TABLES `customers` WRITE;
+/*!40000 ALTER TABLE `customers` DISABLE KEYS */;
+/*!40000 ALTER TABLE `customers` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Deposit`
+-- Table structure for table `deposits`
 --
 
-DROP TABLE IF EXISTS `Deposit`;
+DROP TABLE IF EXISTS `deposits`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Deposit` (
+CREATE TABLE `deposits` (
   `id` int(11) NOT NULL,
   `bank_account` int(11) NOT NULL,
   PRIMARY KEY (`id`)
@@ -247,56 +273,49 @@ CREATE TABLE `Deposit` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Deposit`
+-- Dumping data for table `deposits`
 --
 
-LOCK TABLES `Deposit` WRITE;
-/*!40000 ALTER TABLE `Deposit` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Deposit` ENABLE KEYS */;
+LOCK TABLES `deposits` WRITE;
+/*!40000 ALTER TABLE `deposits` DISABLE KEYS */;
+/*!40000 ALTER TABLE `deposits` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Order`
+-- Table structure for table `order_details`
 --
 
-DROP TABLE IF EXISTS `Order`;
+DROP TABLE IF EXISTS `order_details`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Order` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_time` timestamp NOT NULL,
+CREATE TABLE `order_details` (
+  `order_id` int(11) NOT NULL,
   `trade_name` varchar(30) NOT NULL,
   `amount` int(11) NOT NULL DEFAULT '1',
-  `wid` int(11) NOT NULL,
-  `no_of_transaction` int(11) NOT NULL,
-  `pid` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`order_id`,`trade_name`),
   KEY `trade_name` (`trade_name`),
-  KEY `wid` (`wid`),
-  KEY `pid` (`pid`),
-  CONSTRAINT `Order_ibfk_1` FOREIGN KEY (`trade_name`) REFERENCES `Car_Part` (`trade_name`),
-  CONSTRAINT `Order_ibfk_2` FOREIGN KEY (`wid`) REFERENCES `Workshop` (`id`),
-  CONSTRAINT `Order_ibfk_3` FOREIGN KEY (`pid`) REFERENCES `Provider` (`id`)
+  CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`trade_name`) REFERENCES `car_parts` (`trade_name`),
+  CONSTRAINT `order_details_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Order`
+-- Dumping data for table `order_details`
 --
 
-LOCK TABLES `Order` WRITE;
-/*!40000 ALTER TABLE `Order` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Order` ENABLE KEYS */;
+LOCK TABLES `order_details` WRITE;
+/*!40000 ALTER TABLE `order_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `order_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Order_Payment_Record`
+-- Table structure for table `order_payment_records`
 --
 
-DROP TABLE IF EXISTS `Order_Payment_Record`;
+DROP TABLE IF EXISTS `order_payment_records`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Order_Payment_Record` (
+CREATE TABLE `order_payment_records` (
   `no_of_transaction` int(11) NOT NULL,
   `date_time` timestamp NOT NULL,
   `pid` int(11) NOT NULL,
@@ -305,28 +324,58 @@ CREATE TABLE `Order_Payment_Record` (
   PRIMARY KEY (`no_of_transaction`),
   KEY `pid` (`pid`),
   KEY `did` (`did`),
-  CONSTRAINT `Order_Payment_Record_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `Provider` (`id`),
-  CONSTRAINT `Order_Payment_Record_ibfk_2` FOREIGN KEY (`did`) REFERENCES `Deposit` (`id`)
+  CONSTRAINT `order_payment_records_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `providers` (`id`),
+  CONSTRAINT `order_payment_records_ibfk_2` FOREIGN KEY (`did`) REFERENCES `deposits` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Order_Payment_Record`
+-- Dumping data for table `order_payment_records`
 --
 
-LOCK TABLES `Order_Payment_Record` WRITE;
-/*!40000 ALTER TABLE `Order_Payment_Record` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Order_Payment_Record` ENABLE KEYS */;
+LOCK TABLES `order_payment_records` WRITE;
+/*!40000 ALTER TABLE `order_payment_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `order_payment_records` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Payment_Record`
+-- Table structure for table `orders`
 --
 
-DROP TABLE IF EXISTS `Payment_Record`;
+DROP TABLE IF EXISTS `orders`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Payment_Record` (
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_time` timestamp NOT NULL,
+  `wid` int(11) NOT NULL,
+  `no_of_transaction` int(11) NOT NULL,
+  `pid` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `wid` (`wid`),
+  KEY `pid` (`pid`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`wid`) REFERENCES `workshops` (`id`),
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`pid`) REFERENCES `providers` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `orders`
+--
+
+LOCK TABLES `orders` WRITE;
+/*!40000 ALTER TABLE `orders` DISABLE KEYS */;
+/*!40000 ALTER TABLE `orders` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `payment_records`
+--
+
+DROP TABLE IF EXISTS `payment_records`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `payment_records` (
   `no_of_transaction` int(11) NOT NULL,
   `date_time` timestamp NOT NULL,
   `cid` int(11) NOT NULL,
@@ -335,28 +384,54 @@ CREATE TABLE `Payment_Record` (
   PRIMARY KEY (`no_of_transaction`),
   KEY `cid` (`cid`),
   KEY `did` (`did`),
-  CONSTRAINT `Payment_Record_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `Customer` (`id`),
-  CONSTRAINT `Payment_Record_ibfk_2` FOREIGN KEY (`did`) REFERENCES `Deposit` (`id`)
+  CONSTRAINT `payment_records_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `customers` (`id`),
+  CONSTRAINT `payment_records_ibfk_2` FOREIGN KEY (`did`) REFERENCES `deposits` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Payment_Record`
+-- Dumping data for table `payment_records`
 --
 
-LOCK TABLES `Payment_Record` WRITE;
-/*!40000 ALTER TABLE `Payment_Record` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Payment_Record` ENABLE KEYS */;
+LOCK TABLES `payment_records` WRITE;
+/*!40000 ALTER TABLE `payment_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `payment_records` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Plug`
+-- Table structure for table `plug_properties`
 --
 
-DROP TABLE IF EXISTS `Plug`;
+DROP TABLE IF EXISTS `plug_properties`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Plug` (
+CREATE TABLE `plug_properties` (
+  `sid` int(11) NOT NULL,
+  `pmodel` varchar(30) NOT NULL,
+  PRIMARY KEY (`sid`,`pmodel`),
+  KEY `pmodel` (`pmodel`),
+  CONSTRAINT `plug_properties_ibfk_1` FOREIGN KEY (`sid`) REFERENCES `charging_stations` (`id`),
+  CONSTRAINT `plug_properties_ibfk_2` FOREIGN KEY (`pmodel`) REFERENCES `plugs` (`model`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `plug_properties`
+--
+
+LOCK TABLES `plug_properties` WRITE;
+/*!40000 ALTER TABLE `plug_properties` DISABLE KEYS */;
+/*!40000 ALTER TABLE `plug_properties` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `plugs`
+--
+
+DROP TABLE IF EXISTS `plugs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `plugs` (
   `model` varchar(30) NOT NULL,
   `shape` varchar(30) NOT NULL,
   `size` int(11) NOT NULL,
@@ -366,22 +441,22 @@ CREATE TABLE `Plug` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Plug`
+-- Dumping data for table `plugs`
 --
 
-LOCK TABLES `Plug` WRITE;
-/*!40000 ALTER TABLE `Plug` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Plug` ENABLE KEYS */;
+LOCK TABLES `plugs` WRITE;
+/*!40000 ALTER TABLE `plugs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `plugs` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Provider`
+-- Table structure for table `providers`
 --
 
-DROP TABLE IF EXISTS `Provider`;
+DROP TABLE IF EXISTS `providers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Provider` (
+CREATE TABLE `providers` (
   `id` int(11) NOT NULL,
   `name` varchar(30) NOT NULL,
   `address` varchar(30) DEFAULT NULL,
@@ -392,22 +467,22 @@ CREATE TABLE `Provider` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Provider`
+-- Dumping data for table `providers`
 --
 
-LOCK TABLES `Provider` WRITE;
-/*!40000 ALTER TABLE `Provider` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Provider` ENABLE KEYS */;
+LOCK TABLES `providers` WRITE;
+/*!40000 ALTER TABLE `providers` DISABLE KEYS */;
+/*!40000 ALTER TABLE `providers` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Rent_Record`
+-- Table structure for table `rent_records`
 --
 
-DROP TABLE IF EXISTS `Rent_Record`;
+DROP TABLE IF EXISTS `rent_records`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Rent_Record` (
+CREATE TABLE `rent_records` (
   `id` int(11) NOT NULL,
   `date_from` timestamp NOT NULL,
   `date_to` timestamp NOT NULL,
@@ -417,28 +492,28 @@ CREATE TABLE `Rent_Record` (
   PRIMARY KEY (`id`),
   KEY `cid` (`cid`),
   KEY `cplate` (`cplate`),
-  CONSTRAINT `Rent_Record_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `Customer` (`id`),
-  CONSTRAINT `Rent_Record_ibfk_2` FOREIGN KEY (`cplate`) REFERENCES `Car` (`plate`)
+  CONSTRAINT `rent_records_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `customers` (`id`),
+  CONSTRAINT `rent_records_ibfk_2` FOREIGN KEY (`cplate`) REFERENCES `cars` (`plate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Rent_Record`
+-- Dumping data for table `rent_records`
 --
 
-LOCK TABLES `Rent_Record` WRITE;
-/*!40000 ALTER TABLE `Rent_Record` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Rent_Record` ENABLE KEYS */;
+LOCK TABLES `rent_records` WRITE;
+/*!40000 ALTER TABLE `rent_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `rent_records` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Repair_Record`
+-- Table structure for table `repair_records`
 --
 
-DROP TABLE IF EXISTS `Repair_Record`;
+DROP TABLE IF EXISTS `repair_records`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Repair_Record` (
+CREATE TABLE `repair_records` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_time` timestamp NOT NULL,
   `wid` int(11) NOT NULL,
@@ -447,28 +522,28 @@ CREATE TABLE `Repair_Record` (
   PRIMARY KEY (`id`),
   KEY `wid` (`wid`),
   KEY `cplate` (`cplate`),
-  CONSTRAINT `Repair_Record_ibfk_1` FOREIGN KEY (`wid`) REFERENCES `Workshop` (`id`),
-  CONSTRAINT `Repair_Record_ibfk_2` FOREIGN KEY (`cplate`) REFERENCES `Car` (`plate`)
+  CONSTRAINT `repair_records_ibfk_1` FOREIGN KEY (`wid`) REFERENCES `workshops` (`id`),
+  CONSTRAINT `repair_records_ibfk_2` FOREIGN KEY (`cplate`) REFERENCES `cars` (`plate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Repair_Record`
+-- Dumping data for table `repair_records`
 --
 
-LOCK TABLES `Repair_Record` WRITE;
-/*!40000 ALTER TABLE `Repair_Record` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Repair_Record` ENABLE KEYS */;
+LOCK TABLES `repair_records` WRITE;
+/*!40000 ALTER TABLE `repair_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repair_records` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `Workshop`
+-- Table structure for table `workshops`
 --
 
-DROP TABLE IF EXISTS `Workshop`;
+DROP TABLE IF EXISTS `workshops`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `Workshop` (
+CREATE TABLE `workshops` (
   `id` int(11) NOT NULL,
   `location` varchar(30) NOT NULL,
   `available_timing` int(11) NOT NULL,
@@ -477,39 +552,12 @@ CREATE TABLE `Workshop` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Workshop`
+-- Dumping data for table `workshops`
 --
 
-LOCK TABLES `Workshop` WRITE;
-/*!40000 ALTER TABLE `Workshop` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Workshop` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `Workshop_Car_Parts`
---
-
-DROP TABLE IF EXISTS `Workshop_Car_Parts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
-CREATE TABLE `Workshop_Car_Parts` (
-  `wid` int(11) NOT NULL,
-  `trade_name` varchar(30) NOT NULL,
-  `amount` int(11) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`wid`,`trade_name`),
-  KEY `trade_name` (`trade_name`),
-  CONSTRAINT `Workshop_Car_Parts_ibfk_1` FOREIGN KEY (`wid`) REFERENCES `Workshop` (`id`),
-  CONSTRAINT `Workshop_Car_Parts_ibfk_2` FOREIGN KEY (`trade_name`) REFERENCES `Car_Part` (`trade_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `Workshop_Car_Parts`
---
-
-LOCK TABLES `Workshop_Car_Parts` WRITE;
-/*!40000 ALTER TABLE `Workshop_Car_Parts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Workshop_Car_Parts` ENABLE KEYS */;
+LOCK TABLES `workshops` WRITE;
+/*!40000 ALTER TABLE `workshops` DISABLE KEYS */;
+/*!40000 ALTER TABLE `workshops` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -521,4 +569,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-13 16:54:37
+-- Dump completed on 2018-11-13 18:33:13
