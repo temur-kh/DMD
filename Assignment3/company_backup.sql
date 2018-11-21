@@ -210,7 +210,7 @@ DROP TABLE IF EXISTS `charging_stations`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `charging_stations` (
   `id` int(11) NOT NULL,
-  `GPS_location` varchar(30) NOT NULL,
+  `gps_location` varchar(30) NOT NULL,
   `price_per_charge` int(11) NOT NULL,
   `total_no_of_sockets` int(11) NOT NULL,
   PRIMARY KEY (`id`)
@@ -240,7 +240,7 @@ CREATE TABLE `customers` (
   `email` varchar(30) NOT NULL,
   `phone_number` varchar(10) DEFAULT NULL,
   `bank_account` int(11) NOT NULL,
-  `GPS_Location` varchar(30) NOT NULL,
+  `gps_location` varchar(30) NOT NULL,
   `address` varchar(50) NOT NULL,
   `nearest_station` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -569,4 +569,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-13 18:33:13
+-- Dump completed on 2018-11-21 19:03:46
