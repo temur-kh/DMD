@@ -13,9 +13,9 @@ def create_database(db):
                    "`model` VARCHAR(30) NOT NULL, "
                    "`rent_price` INTEGER NOT NULL,"
                    "`charging_capacity` INTEGER NOT NULL, "
-                   "`pmodel` VARCHAR(30) NOT NULL,"
+                   "`plug` VARCHAR(30) NOT NULL,"
                    "PRIMARY KEY (`model`),"
-                   "FOREIGN KEY (`pmodel`) REFERENCES `plugs`(`model`))")
+                   "FOREIGN KEY (`plug`) REFERENCES `plugs`(`model`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `cars`("
                    "`plate` VARCHAR(30) NOT NULL, "
@@ -31,7 +31,7 @@ def create_database(db):
                    "PRIMARY KEY (`trade_name`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `providers`("
-                   "`id` INTEGER NOT NULL, "
+                   "`id` INTEGER NOT NULL AUTO_INCREMENT, "
                    "`name` VARCHAR(30) NOT NULL, "
                    "`address` VARCHAR(30), "
                    "`phone_number` VARCHAR(10),"
@@ -47,14 +47,14 @@ def create_database(db):
                    "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `deposits`("
-                   "`id` INTEGER NOT NULL, "
+                   "`id` INTEGER NOT NULL AUTO_INCREMENT, "
                    "`bank_account`INTEGER NOT NULL, "
                    "PRIMARY KEY (`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `charging_stations`("
-                   "`id` INTEGER NOT NULL, "
+                   "`id` INTEGER NOT NULL AUTO_INCREMENT, "
                    "`gps_location` VARCHAR(30) NOT NULL, "  # not sure it 30 will be enough, need to check it
-                   "`price_per_charge` INTEGER NOT NULL, "
+                   "`price_per_amount` INTEGER NOT NULL, "
                    "`total_no_of_sockets` INTEGER NOT NULL,"
                    "PRIMARY KEY (`id`))")
 
@@ -62,7 +62,7 @@ def create_database(db):
                    "`station_id` INTEGER NOT NULL,"
                    "`no_of_available_sockets` INTEGER NOT NULL,"
                    "`date_time` TIMESTAMP NOT NULL,"
-                   "PRIMARY KEY (`station_id`),"
+                   "PRIMARY KEY (`station_id`, `date_time`),"
                    "FOREIGN KEY (`station_id`) REFERENCES `charging_stations`(`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `customers`("
