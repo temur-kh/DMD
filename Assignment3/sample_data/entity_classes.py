@@ -32,7 +32,7 @@ class Customer:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO customers " \
-              "(name, phone_number, email, bank_account, username, gps_location, address, nearest_station)" \
+              "(full_name, phone_number, email, bank_account, username, gps_location, address, nearest_station)" \
               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         val = (self.name, self.phone_number, self.email, self.bank_account,
                self.username, self.gps_location, self.address, self.nearest_station)
@@ -57,21 +57,35 @@ class Deposit:
         self.id = cursor.lastrowid
 
 
-class Car:
+class CarModel:
     def __init__(self, plug, fake=Faker()):
-        self.plate = fake.license_plate()
-        self.car_model = fake.company()
-        self.color = fake.safe_color_name()
+        self.model = fake.company()
         self.rent_price = randint(10, 100)
         self.charging_capacity = randint(100, 300)
         self.plug = plug
 
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
+        sql = "INSERT INTO car_models " \
+              "(model, rent_price, charging_capacity, pmodel) " \
+              "VALUES (%s, %s, %s, %s)"
+        val = (self.model, self.rent_price, self.charging_capacity, self.plug.model)
+        cursor.execute(sql, val)
+        db.commit()
+
+
+class Car:
+    def __init__(self, car_model, fake=Faker()):
+        self.plate = fake.license_plate()
+        self.car_model = car_model
+        self.color = fake.safe_color_name()
+
+    def save(self, db: MySQLConnection):
+        cursor = db.cursor()
         sql = "INSERT INTO cars " \
-              "(plate, car_model, color, rent_price, plug) " \
-              "VALUES (%s, %s, %s, %s, %s)"
-        val = (self.plate, self.car_model, self.color, self.rent_price, self.plug.model)
+              "(plate, cmodel, color) " \
+              "VALUES (%s, %s, %s)"
+        val = (self.plate, self.car_model, self.color)
         cursor.execute(sql, val)
         db.commit()
 
@@ -81,13 +95,14 @@ class ChargingStation:
         self.id = None
         self.gps_location = str(fake.latitude()) + " " + str(fake.longitude())
         self.price_per_amount = randint(5, 50)
+        self.total_no_of_sockets = randint(1, 25)
 
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO charging_stations " \
-              "(gps_location, price_per_amount) " \
-              "VALUES (%s, %s)"
-        val = (self.gps_location, self.price_per_amount)
+              "(gps_location, price_per_amount, total_no_of_sockets) " \
+              "VALUES (%s, %s, %s)"
+        val = (self.gps_location, self.price_per_amount, self.total_no_of_sockets)
         cursor.execute(sql, val)
         db.commit()
         self.id = cursor.lastrowid
@@ -103,7 +118,7 @@ class Plug:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO plugs " \
-              "(model, shape, size, chargin_speed) " \
+              "(model, shape, size, charging_speed) " \
               "VALUES (%s, %s, %s, %s)"
         val = (self.model, self.shape, self.size, self.charging_speed)
         cursor.execute(sql, val)
@@ -148,34 +163,35 @@ class Provider:
 
 class CarPart:
     def __init__(self, provider, fake=Faker()):
-        self.provider = provider
         self.trade_name = fake.user_name()
+        self.provider = provider
         self.type = fake.random_element(elements=tuple(get_car_part_names()))
         self.price = randint(25, 500)
 
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO car_parts " \
-              "(provider, trade_name, type, price) " \
+              "(trade_name, pid, type, price) " \
               "VALUES (%s, %s, %s, %s)"
-        val = (self.provider.id, self.trade_name, self.type, self.price)
+        val = (self.trade_name, self.provider.id, self.type, self.price)
         cursor.execute(sql, val)
         db.commit()
 
 
 class Order:
-    def __init__(self, workshop, payment, fake=Faker()):
+    def __init__(self, workshop, provider, payment, fake=Faker()):
         self.id = None
         self.workshop = workshop
+        self.provider = provider
         self.date_time = get_fake_date_time(fake)
         self.payment = payment
 
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO orders " \
-              "(wid, date_time, transaction) " \
-              "VALUES (%s, '%s', %s)"
-        val = (self.workshop.id, self.date_time, self.payment.transaction)
+              "(wid, pid, date_time, no_of_transaction) " \
+              "VALUES (%s, %s, '%s', %s)"
+        val = (self.workshop.id, self.provider.id, self.date_time, self.payment.transaction)
         cursor.execute(sql, val)  # TODO insertion of datetime is to be checked
         db.commit()
         self.id = cursor.lastrowid
@@ -193,7 +209,7 @@ class RentRecord:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO rent_records " \
-              "(cid, car_plate, distance, from_date_time, to_date_time) " \
+              "(cid, cplate, distance, date_from, date_to) " \
               "VALUES (%s, %s, %s, '%s', '%s')"
         val = (self.customer.id, self.car.plate, self.distance, self.from_date_time, self.to_date_time)
         cursor.execute(sql, val)
@@ -211,8 +227,8 @@ class ChargingRecord:
 
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
-        sql = "INSERT INTO charging_records " \
-              "(sid, car_plate, price, date_time) " \
+        sql = "INSERT INTO charge_records " \
+              "(sid, cplate, price, date_time) " \
               "VALUES (%s, %s, %s, '%s')"
         val = (self.charging_station.id, self.car.plate, self.price, self.date_time)
         cursor.execute(sql, val)
@@ -231,7 +247,7 @@ class RepairRecord:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO repair_records " \
-              "(wid, car_plate, price, date_time) " \
+              "(wid, cplate, price, date_time) " \
               "VALUES (%s, %s, %s, '%s')"
         val = (self.workshop.id, self.car.plate, self.price, self.date_time)
         cursor.execute(sql, val)
@@ -250,8 +266,8 @@ class PaymentRecord:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO payment_records " \
-              "(transaction, cid, did, price, date_time) " \
-              "VALUES (%s, %s, %s, '%s')"
+              "(no_of_transaction, cid, did, price, date_time) " \
+              "VALUES (%s, %s, %s, %s, '%s')"
         val = (self.transaction, self.customer.id, self.deposit.id, self.price, self.date_time)
         cursor.execute(sql, val)
         db.commit()
@@ -267,7 +283,7 @@ class PlugProperty:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO plug_properties " \
-              "(sid, plug, amount) " \
+              "(sid, pmodel, amount) " \
               "VALUES (%s, %s, %s)"
         val = (self.charging_station.id, self.plug.model, self.amount)
         cursor.execute(sql, val)
@@ -284,9 +300,9 @@ class CarPartProperty:
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
         sql = "INSERT INTO car_part_properties " \
-              "(wid, car_part, amount) " \
-              "VALUES (%s, %s, %s)"
-        val = (self.workshop.id, self.car_part.trade_name, self.amount)  # TODO how to reference weak entity?
+              "(wid, trade_name, pid, amount) " \
+              "VALUES (%s, %s, %s, %s)"
+        val = (self.workshop.id, self.car_part.trade_name, self.car_part.provider.id, self.amount)
         cursor.execute(sql, val)
         db.commit()
 
@@ -301,8 +317,8 @@ class OrderPayment:
 
     def save(self, db: MySQLConnection):
         cursor = db.cursor()
-        sql = "INSERT INTO order_payments " \
-              "(transaction, did, pid, price, date_time) " \
+        sql = "INSERT INTO order_payment_records " \
+              "(no_of_transaction, did, pid, price, date_time) " \
               "VALUES (%s, %s, %s, %s, '%s')"
         val = (self.transaction, self.deposit.id, self.provider.id, self.price, self.date_time)
         cursor.execute(sql, val)
@@ -312,7 +328,7 @@ class OrderPayment:
 #############################################################################################
 #############################################################################################
 
-
+# for testing purposes
 if __name__ == "__main__":
     fk = Faker()
     user = Customer(fk)
