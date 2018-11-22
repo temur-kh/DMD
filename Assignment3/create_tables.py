@@ -13,9 +13,9 @@ def create_database(db):
                    "`model` VARCHAR(30) NOT NULL, "
                    "`rent_price` INTEGER NOT NULL,"
                    "`charging_capacity` INTEGER NOT NULL, "
-                   "`plug` VARCHAR(30) NOT NULL,"
+                   "`pmodel` VARCHAR(30) NOT NULL,"
                    "PRIMARY KEY (`model`),"
-                   "FOREIGN KEY (`plug`) REFERENCES `plugs`(`model`))")
+                   "FOREIGN KEY (`pmodel`) REFERENCES `plugs`(`model`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `cars`("
                    "`plate` VARCHAR(30) NOT NULL, "
@@ -24,11 +24,11 @@ def create_database(db):
                    "PRIMARY KEY (`plate`),"
                    "FOREIGN KEY (`cmodel`) REFERENCES `car_models`(`model`))")
 
-    cursor.execute("CREATE TABLE IF NOT EXISTS `car_parts`("
-                   "`trade_name` VARCHAR(30) NOT NULL, "
-                   "`type` VARCHAR(30) NOT NULL, "
-                   "`car_model` VARCHAR(30) NOT NULL, "
-                   "PRIMARY KEY (`trade_name`))")
+    # cursor.execute("CREATE TABLE IF NOT EXISTS `car_parts`("
+    #                "`trade_name` VARCHAR(30) NOT NULL, "
+    #                "`type` VARCHAR(30) NOT NULL, "
+    #                "`car_model` VARCHAR(30) NOT NULL, "
+    #                "PRIMARY KEY (`trade_name`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `providers`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
@@ -38,13 +38,22 @@ def create_database(db):
                    "`bank_account` INTEGER NOT NULL,"
                    "PRIMARY KEY (`id`))")
 
-    cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_prices`("
+    cursor.execute("CREATE TABLE IF NOT EXISTS `car_parts`("
                    "`trade_name` VARCHAR(30) NOT NULL, "
                    "`pid` INTEGER NOT NULL, "
+                   "`type` VARCHAR(30) NOT NULL, "
+                   # "`car_model` VARCHAR(30) NOT NULL, "
                    "`price` INTEGER NOT NULL, "
                    "PRIMARY KEY (`trade_name`, `pid`),"
-                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
-                   "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
+                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`) ON DELETE CASCADE)")
+
+    # cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_prices`("
+    #                "`trade_name` VARCHAR(30) NOT NULL, "
+    #                "`pid` INTEGER NOT NULL, "
+    #                "`price` INTEGER NOT NULL, "
+    #                "PRIMARY KEY (`trade_name`, `pid`),"
+    #                "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
+    #                "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `deposits`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
@@ -98,6 +107,7 @@ def create_database(db):
     cursor.execute("CREATE TABLE IF NOT EXISTS `plug_properties`("
                    "`sid` INTEGER NOT NULL, "
                    "`pmodel` VARCHAR(30) NOT NULL, "
+                   "`amount` INTEGER NOT NULL, "
                    "PRIMARY KEY (`sid`, `pmodel`),"
                    "FOREIGN KEY (`sid`) REFERENCES `charging_stations`(`id`),"
                    "FOREIGN KEY (`pmodel`) REFERENCES `plugs`(`model`))")
@@ -105,20 +115,40 @@ def create_database(db):
     cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_properties`("
                    "`wid` INTEGER NOT NULL, "
                    "`trade_name` VARCHAR(30) NOT NULL, "
+                   "`pid` INTEGER NOT NULL, "
                    "`amount` INTEGER NOT NULL DEFAULT 1, "
-                   "PRIMARY KEY (`wid`, `trade_name`),"
+                   "PRIMARY KEY (`wid`, `trade_name`, `pid`),"
                    "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
-                   "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
+                   "FOREIGN KEY (`trade_name`, `pid`) REFERENCES `car_parts`(`trade_name`, `pid`))")
+
+    # cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_properties`("
+    #                "`wid` INTEGER NOT NULL, "
+    #                "`trade_name` VARCHAR(30) NOT NULL, "
+    #                "`amount` INTEGER NOT NULL DEFAULT 1, "
+    #                "PRIMARY KEY (`wid`, `trade_name`),"
+    #                "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
+    #                "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
+
+    cursor.execute("CREATE TABLE IF NOT EXISTS `order_payment_records`("
+                   "`no_of_transaction` INTEGER NOT NULL, "
+                   "`date_time` TIMESTAMP NOT NULL, "
+                   "`pid` INTEGER NOT NULL,"
+                   "`did` INTEGER NOT NULL,"
+                   "`price` INTEGER NOT NULL, "
+                   "PRIMARY KEY (`no_of_transaction`),"
+                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
+                   "FOREIGN KEY (`did`) REFERENCES `deposits`(`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `orders`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
                    "`date_time` TIMESTAMP NOT NULL, "
                    "`wid` INTEGER NOT NULL,"
-                   "`no_of_transaction` INTEGER NOT NULL,"
+                   "`no_of_transaction` INTEGER,"
                    "`pid` INTEGER NOT NULL,"
                    "PRIMARY KEY (`id`),"
                    "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
-                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`))")
+                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
+                   "FOREIGN KEY (`no_of_transaction`) REFERENCES `order_payment_records`(`no_of_transaction`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `order_details`("
                    "`order_id` INTEGER NOT NULL, "
@@ -133,7 +163,7 @@ def create_database(db):
                    "`date_time` TIMESTAMP NOT NULL, "
                    "`wid` INTEGER NOT NULL,"
                    "`cplate` VARCHAR(30) NOT NULL,"
-                   "`cost` INTEGER NOT NULL, "
+                   "`price` INTEGER NOT NULL, "
                    "PRIMARY KEY (`id`),"
                    "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
                    "FOREIGN KEY (`cplate`) REFERENCES `cars`(`plate`))")
@@ -156,15 +186,5 @@ def create_database(db):
                    "`price` INTEGER NOT NULL, "
                    "PRIMARY KEY (`no_of_transaction`),"
                    "FOREIGN KEY (`cid`) REFERENCES `customers`(`id`),"
-                   "FOREIGN KEY (`did`) REFERENCES `deposits`(`id`))")
-
-    cursor.execute("CREATE TABLE IF NOT EXISTS `order_payment_records`("
-                   "`no_of_transaction` INTEGER NOT NULL, "
-                   "`date_time` TIMESTAMP NOT NULL, "
-                   "`pid` INTEGER NOT NULL,"
-                   "`did` INTEGER NOT NULL,"
-                   "`price` INTEGER NOT NULL, "
-                   "PRIMARY KEY (`no_of_transaction`),"
-                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
                    "FOREIGN KEY (`did`) REFERENCES `deposits`(`id`))")
     cursor.close()
