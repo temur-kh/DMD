@@ -45,7 +45,8 @@ def create_database(db):
                    # "`car_model` VARCHAR(30) NOT NULL, "
                    "`price` INTEGER NOT NULL, "
                    "PRIMARY KEY (`trade_name`, `pid`),"
-                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`) ON DELETE CASCADE)")
+                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`) ON DELETE CASCADE "
+                   "ON UPDATE CASCADE)")
 
     # cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_prices`("
     #                "`trade_name` VARCHAR(30) NOT NULL, "
@@ -62,7 +63,7 @@ def create_database(db):
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `charging_stations`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
-                   "`gps_location` VARCHAR(30) NOT NULL, "  # not sure it 30 will be enough, need to check it
+                   "`gps_location` VARCHAR(30) NOT NULL, "
                    "`price_per_amount` INTEGER NOT NULL, "
                    "`total_no_of_sockets` INTEGER NOT NULL,"
                    "PRIMARY KEY (`id`))")
@@ -81,7 +82,7 @@ def create_database(db):
                    "`email` VARCHAR(50) NOT NULL, "
                    "`phone_number` VARCHAR(20),"
                    "`bank_account` VARCHAR(30) NOT NULL,"
-                   "`gps_location` VARCHAR(30) NOT NULL,"  # ?
+                   "`gps_location` VARCHAR(30) NOT NULL,"
                    "`address` VARCHAR(100) NOT NULL,"
                    "`nearest_station` INTEGER,"
                    "PRIMARY KEY (`id`),"
