@@ -3,7 +3,7 @@ def create_database(db):
     cursor.execute("CREATE DATABASE IF NOT EXISTS `company`")
     cursor.execute("USE `company`")
     cursor.execute("CREATE TABLE IF NOT EXISTS `plugs`("
-                   "`model` VARCHAR(30) NOT NULL, "
+                   "`model` VARCHAR(50) NOT NULL, "
                    "`shape` VARCHAR(30) NOT NULL, "
                    "`size` INTEGER NOT NULL,"
                    "`charging_speed` INTEGER NOT NULL, "
@@ -129,26 +129,27 @@ def create_database(db):
     #                "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
     #                "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
 
+    cursor.execute("CREATE TABLE IF NOT EXISTS `orders`("
+                   "`id` INTEGER NOT NULL AUTO_INCREMENT, "
+                   "`date_time` DATETIME NOT NULL, "
+                   "`wid` INTEGER NOT NULL, "
+                   "`pid` INTEGER NOT NULL, "
+                   "PRIMARY KEY (`id`), "
+                   "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
+                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`))")
+
     cursor.execute("CREATE TABLE IF NOT EXISTS `order_payment_records`("
                    "`no_of_transaction` INTEGER NOT NULL, "
                    "`date_time` DATETIME NOT NULL, "
                    "`pid` INTEGER NOT NULL,"
                    "`did` INTEGER NOT NULL,"
+                   "`oid` INTEGER NOT NULL,"
                    "`price` INTEGER NOT NULL, "
                    "PRIMARY KEY (`no_of_transaction`),"
+                   "UNIQUE (`oid`),"
                    "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
+                   "FOREIGN KEY (`oid`) REFERENCES `orders`(`id`),"
                    "FOREIGN KEY (`did`) REFERENCES `deposits`(`id`))")
-
-    cursor.execute("CREATE TABLE IF NOT EXISTS `orders`("
-                   "`id` INTEGER NOT NULL AUTO_INCREMENT, "
-                   "`date_time` DATETIME NOT NULL, "
-                   "`wid` INTEGER NOT NULL,"
-                   "`no_of_transaction` INTEGER,"
-                   "`pid` INTEGER NOT NULL,"
-                   "PRIMARY KEY (`id`),"
-                   "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
-                   "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
-                   "FOREIGN KEY (`no_of_transaction`) REFERENCES `order_payment_records`(`no_of_transaction`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `order_details`("
                    "`order_id` INTEGER NOT NULL, "
