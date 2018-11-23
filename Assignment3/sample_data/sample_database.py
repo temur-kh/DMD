@@ -2,6 +2,7 @@ from .entity_classes import *
 from faker import Faker
 from random import choice
 from mysql.connector.errors import IntegrityError
+from pandas import DataFrame
 
 
 class SampleDatabase:
@@ -27,6 +28,8 @@ class SampleDatabase:
         no_of_plug_properties = 30
         no_of_car_part_properties = 100
         no_of_order_payments = 50
+        no_of_station_sockets = 100
+        no_of_order_details = 60
 
         # reinitialize some attributes if provided
         for key, value in kwargs:
@@ -53,7 +56,9 @@ class SampleDatabase:
         self.tables.append(SampleTable(self, 'rent_records', no_of_rent_records, RentRecord,
                                        context={'customer': 'customers',
                                                 'car': 'cars'}))
-        self.tables.append(SampleTable(self, 'charging_records', no_of_charging_records, ChargingRecord,
+        self.tables.append(SampleTable(self, 'charging_station_sockets', no_of_station_sockets, StationSockets,
+                                       context={'station': 'charging_stations'}))
+        self.tables.append(SampleTable(self, 'charge_records', no_of_charging_records, ChargingRecord,
                                        context={'charging_station': 'charging_stations',
                                                 'car': 'cars'}))
         self.tables.append(SampleTable(self, 'repair_records', no_of_repair_records, RepairRecord,
@@ -71,10 +76,15 @@ class SampleDatabase:
         self.tables.append(SampleTable(self, 'orders', no_of_orders, Order,
                                        context={'workshop': 'workshops',
                                                 'provider': 'providers'}))
-        self.tables.append(SampleTable(self, 'order_payments', no_of_order_payments, OrderPayment,
+        self.tables.append(SampleTable(self, 'order_details', no_of_order_details, OrderDetails,
+                                       context={'order': 'orders',
+                                                'car_part': 'car_parts'}))
+        self.tables.append(SampleTable(self, 'order_payment_records', no_of_order_payments, OrderPayment,
                                        context={'deposit': 'deposits',
                                                 'provider': 'providers',
                                                 'order': 'orders'}))
+
+    def create_data(self):
         # create data for tables
         for table in self.tables:
             table.create_data()
@@ -143,3 +153,14 @@ class SampleTable:
     def upload(self):
         for record in self.records:
             record.save(self.database.conn)
+
+    def get_dataframe(self):
+        cursor = self.database.conn.cursor()
+        sql = "SELECT * FROM %s"
+        cursor.execute(sql % self.name)
+        df = DataFrame(cursor.fetchall())
+        df.columns = [i[0] for i in cursor.description]
+        cursor.close()
+        return df
+
+
