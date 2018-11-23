@@ -20,10 +20,10 @@ class SampleDatabase:
         no_of_plugs = 5
         no_of_car_parts = 100
         no_of_orders = 50
-        no_of_rent_records = 1500
+        no_of_rent_records = 1000
         no_of_charging_records = 300
         no_of_repair_records = 80
-        no_of_payment_records = 1500
+        no_of_payment_records = 1000
         no_of_plug_properties = 30
         no_of_car_part_properties = 100
         no_of_order_payments = 50
@@ -79,11 +79,13 @@ class SampleDatabase:
         for table in self.tables:
             table.create_data()
             print("Data created: " + table.name)
+        print("Creation of data in database is completed!")
 
     def upload(self):
         for table in self.tables:
             table.upload()
             print("Data uploaded: " + table.name)
+        print("Upload of data to database is completed!")
 
 
 class SampleTable:
@@ -98,7 +100,7 @@ class SampleTable:
     def create_data(self):
         for i in range(self.no_of_records):
             record = None
-            unique_find_attempts = 10
+            unique_find_attempts = 100
             while unique_find_attempts:
                 try:
                     if self.context is not None:
@@ -106,23 +108,24 @@ class SampleTable:
                         record = self.entity_model(**attributes, fake=self.database.fake)
                     else:
                         record = self.entity_model(fake=self.database.fake)
-                    if not record.is_unique(self.database.conn) and self.__not_in_records(record):
+                    if self.__in_records(record):
                         raise IntegrityError("Duplicate entry")
-                except IntegrityError as e:
-                    if unique_find_attempts > 1:
-                        unique_find_attempts -= 1
-                    else:
-                        raise IntegrityError("Cannot find unique sample data to insert to table\n" + e.__str__())
+                except IntegrityError:
+                    unique_find_attempts -= 1
+                    if not unique_find_attempts:
+                        raise IntegrityError("Cannot find unique sample data to insert to table. "
+                                             "Attempts left: {}.\n".format(unique_find_attempts))
+                    del record
                     continue
                 else:
                     break
             self.records.append(record)
 
-    def __not_in_records(self, record):
+    def __in_records(self, record):
         for other in self.records:
-            if other == record:
-                return False
-        return True
+            if record.dublicates(other):
+                return True
+        return False
 
     def __create_attr_dict(self):
         attributes = dict()
@@ -131,7 +134,10 @@ class SampleTable:
                 ref_table = [table for table in self.database.tables if table.name == val][0]
             except IndexError as e:
                 raise KeyError("The key reference to the table does not exist!\n" + e.__str__())
-            attributes[key] = choice(ref_table.records)
+            if self.no_of_records == ref_table.no_of_records:
+                attributes[key] = ref_table.records[len(self.records)]  # in case of one-to-one relationship
+            else:
+                attributes[key] = choice(ref_table.records)
         return attributes
 
     def upload(self):
