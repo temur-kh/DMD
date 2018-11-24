@@ -81,15 +81,16 @@ def query2(conn: MySQLConnection):
         sql = "SELECT * FROM charging_stations LIMIT 5"
         cursor.execute(sql)
         # get ids of five stations
-        rand_stations_id = [station[0] for station in cursor.fetchall()]
-        # get no_of_sockets of five stations
-        no_of_socket = [station[3] for station in cursor.fetchall()]
+        data = [station for station in cursor.fetchall()]
+        rand_stations_id = [x[0] for x in data]
+        no_of_socket = [x[3] for x in data]
+
         sql = "INSERT INTO charging_station_sockets (station_id, no_of_available_sockets, date_time) " \
               "VALUES (%s, %s, %s)"
 
         for i in range(len(rand_stations_id)):
             for j in range(randint(1, no_of_socket[i])):
-                value = (rand_stations_id[i], no_of_socket[j] - 1, date)
+                value = (rand_stations_id[i], randint(0, no_of_socket[j]), date + timedelta(hours=randint(0, 23)))
                 cursor.execute(sql, value)
         conn.commit()
     preload_data()
