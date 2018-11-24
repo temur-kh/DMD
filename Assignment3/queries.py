@@ -1,33 +1,75 @@
 from mysql.connector.connection import MySQLConnection
-import datetime
-from random import randrange
+from datetime import datetime, timedelta
+from random import randrange, randint
+from sample_data.entity_classes import get_fake_date_time, getstr
 
 
 def query1(conn: MySQLConnection):
     cursor = conn.cursor()
 
     def preload_data():
+        # get one charging station to be used for nearest_station attribute of customers
+        sql = "SELECT * FROM charging_stations LIMIT 1"
+        cursor.execute(sql)
+        station = cursor.fetchone()
+
+        # insert a customer into table
         sql = "INSERT INTO customers (username, full_name, email, phone_number, " \
               "bank_account, gps_location, address, nearest_station) " \
               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        station_sql = "SELECT * FROM charging_stations LIMIT 1"
-        cursor.execute(station_sql)
-        station = cursor.fetchone()
         value = ("Liza", "Elizabeth", "elizabeth@gmail.com",
                  "123456789", "12341234", "gps-location", "address", station[0])
         cursor.execute(sql, value)
+        conn.commit()
+        customer_id = cursor.lastrowid
+
+        # get 5 car plates to add rent records between the customer and cars
+        sql = "SELECT * FROM cars LIMIT 5"
+        cursor.execute(sql)
+        rand_cplates = [car[0] for car in cursor.fetchall()]
+
+        # create 5 rent records between the customer and chosen cars on a specific day
+        date_time = datetime(2018, 11, 27, 0, 0, 0)
+        for i in range(5):
+            sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
+                       "VALUES (%s, %s, %s, %s, %s)"
+            date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
+            date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
+            value = (getstr(date_from), getstr(date_to), customer_id, rand_cplates[i], randint(1, 100))
+            cursor.execute(sql, value)
+            date_time = date_to
+        conn.commit()
+
+        # create a red car with using some car model and plate starting with 'AN'
+        sql = "SELECT * FROM car_models LIMIT 1"
+        cursor.execute(sql)
+        model = cursor.fetchone()
+
         sql = "INSERT INTO cars (plate, cmodel, color) " \
               "VALUES(%s, %s, %s)"
-        model_sql = "SELECT * FROM car_models LIMIT 1"
-        cursor.execute(model_sql)
-        model = cursor.fetchone()
         value = ("ANINAS", model[0], "red")
         cursor.execute(sql, value)
         conn.commit()
+        cplate = cursor.lastrowid
+
+        # create a rent record between the customer and this car
+        sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
+              "VALUES (%s, %s, %s, %s, %s)"
+        date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
+        date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
+        value = (getstr(date_from), getstr(date_to), customer_id, cplate, randint(1, 100))
+        cursor.execute(sql, value)
+        conn.commit()
+
     preload_data()
-    query = "SELECT * FROM cars WHERE color = %s AND SUBSTRING(plate,1,2) = %s"
-    val = ("red", "AN")
+    query = "SELECT * FROM rent_records AS r " \
+            "INNER JOIN cars AS car ON r.cplate=car.plate " \
+            "INNER JOIN customers AS c ON r.cid=c.id " \
+            "WHERE c.full_name=%s AND DATE(r.date_from)=DATE(%s) " \
+            "AND car.color=%s AND car.plate LIKE (%s+'%')"
+    val = ("Elizabeth", datetime(2018, 11, 27), "red", "AN")
     cursor.execute(query, val)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
 def query2(conn: MySQLConnection):
