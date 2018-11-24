@@ -1,0 +1,159 @@
+    1  ls
+    2  sudo apt-get update
+    3  sudo apt-get install mysql-server
+    4  mysql_secure_installation
+    5  mysql -u root -p
+    6  python -V
+    7  sudo add-apt-repository ppa:jonathonf/python-3.6
+    8  sudo apt update
+    9  sudo apt install python3.6
+   10  python -V
+   11  python3 -V
+   12  python3.6 -V
+   13  sudo apt-get update && sudo apt-get -y upgrade
+   14  sudo apt-get install python-pip
+   15  pip -V
+   16  virtualenv
+   17  pip install virtualenv
+   18  sudo pip install virtualenv
+   19  export LC_ALL="en_US.UTF-8"
+   20  export LC_CTYPE="en_US.UTF-8"
+   21  sudo dpkg-reconfigure locales
+   22  sudo pip install virtualenv
+   23  ls
+   24  cd ~
+   25  mkdir DMDAssignment
+   26  cd cd DMDAssignment/
+   27  apt-get update
+   28  apt-get install git-core
+   29  git config --global user.name "Temur"
+   30  git config --global user.email "tim_1998@bk.ru"
+   31  cd DMDAssignment/
+   32  git init
+   33  git clone https://github.com/temur-kh/DMD.git
+   34  cd
+   35  cd DMDAssignment/
+   36  ls
+   37  cd DMD
+   38  ls
+   39  cd ..
+   40  mv DMD ../DMD
+   41  ls
+   42  cd ..
+   43  ls
+   44  rm -r DMDAssignment/
+   45  cd DMD
+   46  git init
+   47  git remote add origin https://github.com/temur-kh/DMD.git
+   48  cd
+   49  cd DMD
+   50  ls
+   51  cd Assignment3/
+   52  ls
+   53  virtualenv venv
+   54  source venv/bin/activate
+   55  pip install -r requirements.txt 
+   56  python -V
+   57  python3 -V
+   58  python3.6 -V
+   59  python3 main_local.py 
+   60  pip install mysql-connector-python-rf
+   61  python3 main_local.py 
+   62  pip search mysql-connector | grep --color mysql-connector-python
+   63  pip uninstall mysql-connector-python-rf
+   64  pip freeze
+   65  python main_local.py 
+   66  python3.6 main_local.py 
+   67  python
+   68  sudo apt-get install python3-mysql.connector
+   69  python3 main_local.py 
+   70  pip freeze
+   71  pip install faker
+   72  python3 main_local.py 
+   73  sudo apt-get install python-mysql.connector
+   74  pip3 install -r requirements.txt 
+   75  deactivate 
+   76  rm -r venv
+   77  apt install python3-pip
+   78  virtualenv venv
+   79  pip3
+   80  pip3 install -r requirements.txt 
+   81  python3 main_local.py 
+   82  sudo apt-get install python3-tk
+   83  python3 main_local.py 
+   84  mysql -u root -p
+   85  python3 main_local.py 
+   86  mysql -u user1 -p
+   87  nano /etc/mysql/mysql.conf.d/mysqld.cnf
+   88  Step two: Granting access to the user
+   89  Let's say you have your WordPress server set up (running on IP address 192.168.1.100) to access a MySQL database named wordpressdb on the MySQL server with user wpadmin. On the MySQL server, you must grant access to the wordpressdb to that user from that IP address. Here's how to grant the user access (I'm assuming you already created the user wpadmin on the MySQL server and given it password %u#098Tl3).
+   90  Log in to the MySQL server.
+   91  Log in to MySQL with the command mysql -u root -p
+   92  Type the MySQL root user password.
+   93  Issue the MySQL command:
+   94  GRANT ALL ON wordpressdb.* TO 'wpadmin'@'192.168.1.100' IDENTIFIED BY '%u#098Tl3' WITH GRANT OPTION;
+   95  Flush the MySQL privileges with the command FLUSH PRIVILEGES;
+   96  Exit out of the MySQL prompt with the command exit;
+   97  Your WordPress instance (set up with the proper user credentials for the database) should be able to use the remote MySQL server as its database host.
+   98  Congratulations! You successfully set up MySQL for remote connections.
+   99  Keep it secure
+  100  Although you can open MySQL for connections from remote servers, you should only grant privileges for select users to avoid possible security breaches. Also, be sure those users use very strong passwords. When you combine that with keeping your MySQL server up to date, you should be good to go.
+  101  For more networking tips and tricks, subscribe to our Data Center Trends newsletter.
+  102  Also see
+  103  How to harden MySQL security with a single command (TechRepublic)
+  104  How to back up MySQL databases from the command line in Linux (TechRepublic)
+  105  How to install WordPress on Ubuntu 16.04 (TechRepublic)
+  106  How to automate database backups with backupninja (TechRepublic)
+  107  More Linux on my new notebook: Fedora, Linux Mint and Ubuntu (ZDNet)
+  108  RELATED TOPICS: DATA CENTERS  OPEN SOURCE  HARDWARE  VIRTUALIZATION NETWORKING  STORAGE  CLOUD
+  109  0
+  110  377
+  111  About Jack Wallen
+  112  Jack Wallen is an award-winning writer for TechRepublic and Linux.com. He’s an avid promoter of open source and the voice of The Android Expert. For more news about Jack Wallen, visit his website jackwallen.com.
+  113  Full BioContactSee all of Jack's content jlwallen
+by TaboolaPromoted Links
+Recommended
+These Twins Were Named "Most Beautiful In The World," Wait Till You See Them Today
+Give It Love
+Flights In Russian Federation At Ridiculously Low Prices
+Save70.com
+People from Russian Federation cannot believe these flight prices
+Trips Shop
+ | Commenting FAQs | Community Guidelines
+Join Discussion
+
+WHITE PAPERS, WEBCASTS, AND DOWNLOADS
+ 
+Special Report: A Guide to Data Center Automation (free PDF)
+eBooks from TechRepublic
+
+ 
+Network, PC, and server audit checklist
+Downloads from Erik Eckel
+
+ 
+Beyond the Cubicle: Life in the Digital Workspace
+White Papers from Citrix
+
+ 
+The Guide to Multi-Dimensional ADC Scaling for Digital Transformation
+White Papers from Citrix
+
+ 
+The ADC Guide to Managing Hybrid (IT and DevOps) Application Delivery
+White Papers from Citrix
+
+ 
+EDITOR'S PICKS
+  114  The Brexit dilemma: Will London's start-ups stay or go?
+The Brexit dilemma: Will London's start-ups stay or go?
+  115  America's coolest company: How Big Ass Fans went from cooling cows to a multinational tech powerhouse
+America's coolest company: How Big Ass Fans went from cooling cows to a multinational tech powerhouse
+  116  Can Russian hackers be stopped? Here's why it might take 20 years
+Can Russian hackers be stopped? Here's why it might take 20 years
+  117  The new commute: How driverless cars, hyperloop, and drones will change our travel plans
+  118  by TaboolaSponsored LinksRECOMMENDED
+  119  systemctl restart mysql.service
+  120  lsof -i -P | grep :3306
+  121  mysql -u root -p
+  122  history > history.txt
