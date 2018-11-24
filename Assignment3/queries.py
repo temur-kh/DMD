@@ -108,6 +108,10 @@ def query5(conn:MySQLConnection):
     cursor = conn.cursor()
 
 
+def query5():
+    return
+
+
 def get_all_query_results():
     return []
 
