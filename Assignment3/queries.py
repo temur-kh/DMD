@@ -80,7 +80,7 @@ def query2(conn: MySQLConnection):
         # get five charging stations to be used for statistics
         sql = "SELECT * FROM charging_stations LIMIT 5"
         cursor.execute(sql)
-        # get ids of five stations
+        # get ids and # of sockets of five stations
         data = [station for station in cursor.fetchall()]
         rand_stations_id = [x[0] for x in data]
         no_of_socket = [x[3] for x in data]
@@ -102,14 +102,21 @@ def query3(conn: MySQLConnection):
     def preload_data():
         return
     preload_data()
-    sql = "SELECT * FROM rent_records " \
-          "WHERE DATE(date_from) BETWEEN %s AND %s"
+    sql = "SELECT * FROM (SELECT * FROM rent_records WHERE DATE(date_from) BETWEEN %s AND %s) " \
+          "GROUP BY date_from BETWEEN %s AND %s, date_from BETWEEN %s AND %s, date_from BETWEEN %s AND %s"
     d1 = datetime.datetime(2018, 5, 7)
     d2 = datetime.datetime(2018, 5, 14)
-    value = (d1, d2)
+    mor1 = datetime.time(7, 0)
+    mor2 = datetime.time(10, 0)
+    aft1 = datetime.time(12, 0)
+    aft2 = datetime.time(14, 0)
+    eve1 = datetime.time(17, 0)
+    eve2 = datetime.time(19, 0)
+    value = (d1, d2, mor1, mor2, aft1, aft2, eve1, eve2)
     cursor.execute(sql, value)
-    selected = cursor.fetchone()
-    sql = "SELECT * FROM selected "
+    return cursor.fetchall(), [i[0] for i in cursor.description]
+
+
 
 def query4(conn: MySQLConnection):
     cursor = conn.cursor()
