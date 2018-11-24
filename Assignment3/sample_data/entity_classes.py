@@ -11,7 +11,7 @@ def get_car_part_names():
     return names
 
 
-def get_fake_date_time(fake, start=datetime(2018, 1, 1, 0, 0, 0), end=datetime(2018, 12, 31, 23, 59, 59)):
+def get_fake_date_time(fake=Faker(), start=datetime(2018, 1, 1, 0, 0, 0), end=datetime(2018, 12, 31, 23, 59, 59)):
     return fake.date_time_between_dates(
         datetime_start=start,
         datetime_end=end
