@@ -10,10 +10,10 @@ def create_database(db):
                    "PRIMARY KEY (`model`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `car_models`("
-                   "`model` VARCHAR(30) NOT NULL, "
+                   "`model` VARCHAR(50) NOT NULL, "
                    "`rent_price` INTEGER NOT NULL,"
                    "`charging_capacity` INTEGER NOT NULL, "
-                   "`pmodel` VARCHAR(30) NOT NULL,"
+                   "`pmodel` VARCHAR(50) NOT NULL,"
                    "PRIMARY KEY (`model`),"
                    "FOREIGN KEY (`pmodel`) REFERENCES `plugs`(`model`))")
 
@@ -155,9 +155,10 @@ def create_database(db):
     cursor.execute("CREATE TABLE IF NOT EXISTS `order_details`("
                    "`order_id` INTEGER NOT NULL, "
                    "`trade_name` VARCHAR(50) NOT NULL, "
+                   "`pid` INTEGER NOT NULL, "
                    "`amount` INTEGER NOT NULL DEFAULT 1,"
-                   "PRIMARY KEY (`order_id`, `trade_name`),"
-                   "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`),"
+                   "PRIMARY KEY (`order_id`, `trade_name`, `pid`),"
+                   "FOREIGN KEY (`trade_name`, `pid`) REFERENCES `car_parts`(`trade_name`, `pid`),"
                    "FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `repair_records`("

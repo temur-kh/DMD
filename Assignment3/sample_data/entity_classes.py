@@ -244,7 +244,6 @@ class RentRecord(Entity):
         self.date_to = get_fake_date_time(fake,
                                           start=self.date_from,
                                           end=self.date_from + timedelta(days=1))
-        # print(self.customer.id, self.car.plate, self.date_from, self.date_to)
 
     def save(self, conn: MySQLConnection):
         cursor = conn.cursor()
@@ -394,3 +393,44 @@ class OrderPayment(Entity):
 
     def dublicates(self, other):
         return self.transaction == other.transaction
+
+
+class StationSockets(Entity):
+    def __init__(self, station, fake=Faker()):
+        self.station = station
+        self.no_of_available_sockets = randint(0, station.total_no_of_sockets)
+        self.date_time = get_fake_date_time(fake, end=datetime(2018, 9, 1))
+
+    def save(self, conn: MySQLConnection):
+        cursor = conn.cursor()
+        sql = "INSERT INTO charging_station_sockets " \
+              "(station_id, no_of_available_sockets, date_time) " \
+              "VALUES (%s, %s, %s)"
+        val = (self.station.id, self.no_of_available_sockets, getstr(self.date_time))
+        cursor.execute(sql, val)
+        conn.commit()
+
+    def dublicates(self, other):
+        return self.station.dublicates(other.station) and \
+               self.date_time == other.date_time
+
+
+class OrderDetails(Entity):
+    def __init__(self, order, car_part, fake=Faker()):
+        self.order = order
+        self.car_part = car_part
+        self.amount = randint(1, 10)
+        _ = fake
+
+    def save(self, conn: MySQLConnection):
+        cursor = conn.cursor()
+        sql = "INSERT INTO order_details " \
+              "(order_id, trade_name, pid, amount) " \
+              "VALUES (%s, %s, %s, %s)"
+        val = (self.order.id, self.car_part.trade_name,
+               self.car_part.provider.id, self.amount)
+        cursor.execute(sql, val)
+        conn.commit()
+
+    def dublicates(self, other):
+        return self.car_part.dublicates(other.car_part)
