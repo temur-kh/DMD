@@ -5,14 +5,16 @@ from faker import Faker
 import tkinter as tk
 from gui_application.window import ApplicationWindow
 
-remote_host = ""
-user = ""
-pswd = ""
+remote_host = "46.101.235.112"
+user = "user1"
+pswd = "dmd@assignment@3"
+db = "company"
 
 conn = mysql.connector.connect(
     host=remote_host,
     user=user,
-    passwd=pswd
+    passwd=pswd,
+    database=db
 )
 
 fake = Faker()

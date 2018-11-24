@@ -244,7 +244,6 @@ class RentRecord(Entity):
         self.date_to = get_fake_date_time(fake,
                                           start=self.date_from,
                                           end=self.date_from + timedelta(days=1))
-        # print(self.customer.id, self.car.plate, self.date_from, self.date_to)
 
     def save(self, conn: MySQLConnection):
         cursor = conn.cursor()
