@@ -12,3 +12,5 @@ def query1(conn: MySQLConnection):
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
+def get_all_query_results():
+    return []
