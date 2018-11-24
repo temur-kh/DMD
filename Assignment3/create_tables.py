@@ -35,7 +35,7 @@ def create_database(db):
                    "`name` VARCHAR(50) NOT NULL, "
                    "`address` VARCHAR(100), "
                    "`phone_number` VARCHAR(20),"
-                   "`bank_account` VARCHAR(30) NOT NULL,"
+                   "`bank_account` VARCHAR(50) NOT NULL,"
                    "PRIMARY KEY (`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `car_parts`("
@@ -58,7 +58,7 @@ def create_database(db):
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `deposits`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
-                   "`bank_account` VARCHAR(30) NOT NULL, "
+                   "`bank_account` VARCHAR(50) NOT NULL, "
                    "PRIMARY KEY (`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `charging_stations`("
@@ -81,7 +81,7 @@ def create_database(db):
                    "`full_name` VARCHAR(50) NOT NULL,"
                    "`email` VARCHAR(50) NOT NULL, "
                    "`phone_number` VARCHAR(20),"
-                   "`bank_account` VARCHAR(30) NOT NULL,"
+                   "`bank_account` VARCHAR(50) NOT NULL,"
                    "`gps_location` VARCHAR(30) NOT NULL,"
                    "`address` VARCHAR(100) NOT NULL,"
                    "`nearest_station` INTEGER,"
