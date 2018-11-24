@@ -154,6 +154,22 @@ def query5():
     return
 
 
+def query10(conn: MySQLConnection):
+    def preload_data():
+        pass  # no need to preload data, use the sample data from the database
+
+    preload_data()
+    cursor = conn.cursor()
+    sql = "SELECT cplate AS CarPlate, AVG(day_price) AS AvgPrice " \
+          "FROM (SELECT cplate, SUM(price) AS day_price " \
+          "FROM ((SELECT date_time, price, cplate FROM repair_records) UNION " \
+          "(SELECT date_time, price, cplate FROM charge_records)) AS records " \
+          "GROUP BY DATE(date_time), cplate) AS prices " \
+          "GROUP BY cplate ORDER BY AvgPrice DESC LIMIT 1"
+    cursor.execute(sql)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
+
+
 def get_all_query_results():
     return []
 
