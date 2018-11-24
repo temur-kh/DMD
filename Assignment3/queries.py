@@ -156,7 +156,6 @@ def query4(conn: MySQLConnection):
 
 def query5(conn:MySQLConnection):
     cursor = conn.cursor()
-    date_time = datetime(2018, 11, 27, 0, 0, 0)
 
     def preload_data():
         sql = "SELECT customers FROM customers LIMIT 5"
@@ -166,6 +165,7 @@ def query5(conn:MySQLConnection):
         sql = "SELECT cars FROM cars LIMIT 10"
         cursor.execute(sql)
         plates = [x[0] for x in cursor.fetchall()]
+        date_time = datetime(2018, 11, 27, 0, 0, 0)
         for i in range(randint(0, 30)):
             sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
                   "VALUES (%s, %s, %s, %s, %s)"
@@ -175,7 +175,7 @@ def query5(conn:MySQLConnection):
         conn.commit()
     preload_data()
     sql = "SELECT AVG(distance) FROM rent_records WHERE DATE(date_from) = %s"
-    cursor.execute(sql, date_time)
+    cursor.execute(sql, datetime(2018, 11, 27))
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
