@@ -74,35 +74,35 @@ def query1(conn: MySQLConnection):
 
 def query2(conn: MySQLConnection):
     cursor = conn.cursor()
-    date = datetime.datetime(2018, 5, 5)
+    date = datetime.datetime(2018, 5, 5, 0, 0, 0)
 
     def preload_data():
-        for i in range(50):
-            rndm_date = random_date(date, date + 1)
-            sql = "INSERT INTO charge_records (date_time, cplate, price) VALUES (%s, %s, %s)"
-            cplate_sql = "SELECT plate FROM cars LIMIT 1"
-            cursor.execute(cplate_sql)
-            cplate = cursor.fetchone()
-            value = (rndm_date, cplate, 1234)
-            cursor.execute(sql, value)
+        # get five charging stations to be used for statistics
+        sql = "SELECT * FROM charging_stations LIMIT 5"
+        cursor.execute(sql)
+        # get ids of five stations
+        rand_stations_id = [station[0] for station in cursor.fetchall()]
+        # get no_of_sockets of five stations
+        no_of_socket = [station[3] for station in cursor.fetchall()]
+        sql = "INSERT INTO charging_station_sockets (station_id, no_of_available_sockets, date_time) " \
+              "VALUES (%s, %s, %s)"
+
+        for i in range(len(rand_stations_id)):
+            for j in range(randint(1, no_of_socket[i])):
+                value = (rand_stations_id[i], no_of_socket[j] - 1, date)
+                cursor.execute(sql, value)
+        conn.commit()
     preload_data()
-    query = "SELECT date_time FROM charge_records WHERE date_time BETWEEN %s AND %s"
-    value = (date, date + 1)
-    cursor.execute(query, value)
-    row = cursor.fetchone()
-    result = [24]
-    for x in row:
-        result[x.hour] += 1
 
 
-def query3(conn:MySQLConnection):
+def query3(conn: MySQLConnection):
     cursor = conn.cursor()
 
     def preload_data():
         return
     preload_data()
     sql = "SELECT * FROM rent_records " \
-          "WHERE DATE(date_from) BETWEEN %s AND %s AND HOUR(date_from)"
+          "WHERE DATE(date_from) BETWEEN %s AND %s"
     d1 = datetime.datetime(2018, 5, 7)
     d2 = datetime.datetime(2018, 5, 14)
     value = (d1, d2)
