@@ -32,7 +32,7 @@ def query1(conn: MySQLConnection):
         date_time = datetime(2018, 11, 27, 0, 0, 0)
         for i in range(5):
             sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
-                       "VALUES (%s, %s, %s, %s, %s)"
+                  "VALUES (%s, %s, %s, %s, %s)"
             date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
             date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
             value = (getstr(date_from), getstr(date_to), customer_id, rand_cplates[i], randint(1, 100))
@@ -85,6 +85,7 @@ def query2(conn: MySQLConnection):
             cplate = cursor.fetchone()
             value = (rndm_date, cplate, 1234)
             cursor.execute(sql, value)
+
     preload_data()
     query = "SELECT date_time FROM charge_records WHERE date_time BETWEEN %s AND %s"
     value = (date, date + 1)
@@ -95,11 +96,12 @@ def query2(conn: MySQLConnection):
         result[x.hour] += 1
 
 
-def query3(conn:MySQLConnection):
+def query3(conn: MySQLConnection):
     cursor = conn.cursor()
 
     def preload_data():
         return
+
     preload_data()
     sql = "SELECT * FROM rent_records " \
           "WHERE DATE(date_from) BETWEEN %s AND %s AND HOUR(date_from)"
@@ -109,6 +111,7 @@ def query3(conn:MySQLConnection):
     cursor.execute(sql, value)
     selected = cursor.fetchone()
     sql = "SELECT * FROM selected "
+
 
 def query4(conn: MySQLConnection):
     cursor = conn.cursor()
@@ -137,6 +140,7 @@ def query4(conn: MySQLConnection):
             value = (date, random_date(date, d2), customer[0], cplate[0], 1234)
             cursor.execute(sql, value)
             conn.commit()
+
     preload_data()
 
     customer_sql = "SELECT id FROM customers WHERE full_name = %s"
@@ -146,12 +150,59 @@ def query4(conn: MySQLConnection):
     cursor.execute(query, customer[0])
 
 
-def query5(conn:MySQLConnection):
+def query5(conn: MySQLConnection):
     cursor = conn.cursor()
 
 
-def query5():
-    return
+def query7(conn: MySQLConnection):
+    def preload_data():
+        pass  # no need to preload data, use the sample data from the database
+
+    start_first_month = datetime(2018, 8, 1)
+    end_third_month = datetime(2018, 10, 31)
+    preload_data()
+    cursor = conn.cursor()
+    # create variable in database - 10% of amount of all cars
+    sql = "SET @counter = 0.1 * (SELECT COUNT(*) FROM cars)"
+    cursor.execute(sql)  # TODO need to test the variable
+    sql = "SELECT cplate AS CarPlate, COUNT(rr.id) AS RentAmount FROM rent_records AS rr " \
+          "WHERE DATE(rr.date_from) BETWEEN DATE(%s) AND DATE(%s) " \
+          "GROUP BY cplate ORDER BY RentAmount LIMIT @counter"
+    val = (start_first_month, end_third_month, start_first_month, end_third_month)
+    cursor.execute(sql, val)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
+
+
+def query8(conn: MySQLConnection):
+    def preload_data():
+        pass  # TODO might need to preload data, yet check after testing
+
+    preload_data()
+    start_date = datetime(2018, 8, 1)
+    end_date = datetime(2018, 8, 31)
+    cursor = conn.cursor()
+    sql = "SELECT rr.cid, COUNT(cr.id) FROM rent_records AS rr " \
+          "INNER JOIN charge_records AS cr ON rr.cplate = cr.cplate " \
+          "AND DATE(rr.date_from) = DATE(cr.date_time) " \
+          "WHERE DATE(cr.date_time) BETWEEN DATE(%s) AND DATE(%s)"
+    val = (start_date, end_date)
+    cursor.execute(sql, val)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
+
+
+def query9(conn: MySQLConnection):
+    def preload_data():
+        pass  # no need to preload data, use the sample data from the database
+
+    preload_data()
+    cursor = conn.cursor()
+    sql = "SELECT D.wid AS WorkshopID, D.type, SUM(D.amount) AS Amount " \
+          "FROM (SELECT d.amount, o.wid, p.type FROM order_details as d " \
+          "INNER JOIN orders AS o ON d.order_id = o.id " \
+          "INNER JOIN car_parts AS p ON p.trade_name = d.trade_name AND p.pid = d.pid) AS D " \
+          "GROUP BY D.wid, D.type ORDER BY Amount DESC"
+    cursor.execute(sql)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
 def query10(conn: MySQLConnection):
