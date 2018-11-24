@@ -1,5 +1,5 @@
 from mysql.connector.connection import MySQLConnection
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from random import randrange, randint
 from sample_data.entity_classes import get_fake_date_time, getstr
 
@@ -104,18 +104,17 @@ def query3(conn: MySQLConnection):
     preload_data()
     sql = "SELECT * FROM (SELECT * FROM rent_records WHERE DATE(date_from) BETWEEN %s AND %s) " \
           "GROUP BY date_from BETWEEN %s AND %s, date_from BETWEEN %s AND %s, date_from BETWEEN %s AND %s"
-    d1 = datetime.datetime(2018, 5, 7)
-    d2 = datetime.datetime(2018, 5, 14)
-    mor1 = datetime.time(7, 0)
-    mor2 = datetime.time(10, 0)
-    aft1 = datetime.time(12, 0)
-    aft2 = datetime.time(14, 0)
-    eve1 = datetime.time(17, 0)
-    eve2 = datetime.time(19, 0)
+    d1 = datetime(2018, 5, 7)
+    d2 = datetime(2018, 5, 14)
+    mor1 = time(7, 0)
+    mor2 = time(10, 0)
+    aft1 = time(12, 0)
+    aft2 = time(14, 0)
+    eve1 = time(17, 0)
+    eve2 = time(19, 0)
     value = (d1, d2, mor1, mor2, aft1, aft2, eve1, eve2)
     cursor.execute(sql, value)
     return cursor.fetchall(), [i[0] for i in cursor.description]
-
 
 
 def query4(conn: MySQLConnection):
@@ -144,22 +143,40 @@ def query4(conn: MySQLConnection):
             cplate = cursor.fetchone()
             value = (date, random_date(date, d2), customer[0], cplate[0], 1234)
             cursor.execute(sql, value)
-            conn.commit()
+        conn.commit()
     preload_data()
 
     customer_sql = "SELECT id FROM customers WHERE full_name = %s"
     cursor.execute(customer_sql, "Elizabeth")
     customer = cursor.fetchone()
+
     query = "SELECT * FROM payment_records WHERE cid = %s"
     cursor.execute(query, customer[0])
 
 
 def query5(conn:MySQLConnection):
     cursor = conn.cursor()
+    date_time = datetime(2018, 11, 27, 0, 0, 0)
 
+    def preload_data():
+        sql = "SELECT customers FROM customers LIMIT 5"
+        cursor.execute(sql)
+        ids = [x[0] for x in cursor.fetchall()]
 
-def query5():
-    return
+        sql = "SELECT cars FROM cars LIMIT 10"
+        cursor.execute(sql)
+        plates = [x[0] for x in cursor.fetchall()]
+        for i in range(randint(0, 30)):
+            sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
+                  "VALUES (%s, %s, %s, %s, %s)"
+            date_to = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
+            value = (date_time, date_to, ids[randint(0, len(ids))], plates[randint(0, len(plates))], randint(1, 100))
+            cursor.execute(sql, value)
+        conn.commit()
+    preload_data()
+    sql = "SELECT AVG(distance) FROM rent_records WHERE DATE(date_from) = %s"
+    cursor.execute(sql, date_time)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
 def get_all_query_results():
