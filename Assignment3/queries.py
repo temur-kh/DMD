@@ -1,6 +1,7 @@
 from mysql.connector.connection import MySQLConnection
 from datetime import datetime, timedelta, time
-from random import randrange, randint
+from random import randint
+from pandas import DataFrame
 from sample_data.entity_classes import get_fake_date_time, getstr
 
 
@@ -14,12 +15,18 @@ def query1(conn: MySQLConnection):
         cursor.execute(sql)
         station = cursor.fetchone()
 
+        sql = "DELETE FROM customers WHERE username = %s OR full_name = %s OR " \
+              "email = %s OR phone_number = %s OR bank_account = %s "
+        value = ("Liza", "Elizabeth Test", "elizabeth@gmail.com",
+                 "123456789", "12341234")
+        cursor.execute(sql)
+        conn.commit()
+
         # insert a customer into table
         sql = "INSERT INTO customers (username, full_name, email, phone_number, " \
               "bank_account, gps_location, address, nearest_station) " \
               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        value = ("Liza", "Elizabeth", "elizabeth@gmail.com",
-                 "123456789", "12341234", "gps-location", "address", station[0])
+        value = value + ("gps-location", "address", station[0])
         cursor.execute(sql, value)
         conn.commit()
         customer_id = cursor.lastrowid
@@ -30,7 +37,7 @@ def query1(conn: MySQLConnection):
         rand_cplates = [car[0] for car in cursor.fetchall()]
 
         # create 5 rent records between the customer and chosen cars on a specific day
-        date_time = date
+        date_time = date + timedelta(hours=0)
         sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
               "VALUES (%s, %s, %s, %s, %s)"
         for i in range(5):
@@ -68,7 +75,7 @@ def query1(conn: MySQLConnection):
             "INNER JOIN customers AS c ON r.cid = c.id " \
             "WHERE c.full_name = %s AND DATE(r.date_from) = DATE(%s) " \
             "AND car.color = %s AND car.plate LIKE (%s + '%')"
-    val = ("Elizabeth", date, "red", "AN")
+    val = ("Elizabeth Test", date, "red", "AN")
     cursor.execute(query, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
@@ -96,13 +103,13 @@ def query2(conn: MySQLConnection):
         conn.commit()
 
     preload_data()
-    sql = "SELECT CONCAT(HOUR(css.date_time), '-', HOUR(css.date_time + TIME('01:00:00'))) AS Period, " \
-          "(cs.total_no_of_sockets - AVG(css.no_of_available_sockets)) AS OccupiedSockets " \
-          "FROM charging_station_sockets AS css " \
-          "INNER JOIN charging_stations AS cs ON css.station_id = cs.id " \
-          "WHERE DATE(css.date_time) = DATE(%s) GROUP BY HOUR(css.date_time)"
+    query = "SELECT CONCAT(HOUR(css.date_time), '-', HOUR(css.date_time + TIME('01:00:00'))) AS Period, " \
+            "(cs.total_no_of_sockets - AVG(css.no_of_available_sockets)) AS OccupiedSockets " \
+            "FROM charging_station_sockets AS css " \
+            "INNER JOIN charging_stations AS cs ON css.station_id = cs.id " \
+            "WHERE DATE(css.date_time) = DATE(%s) GROUP BY HOUR(css.date_time)"
     val = (date,)
-    cursor.execute(sql, val)
+    cursor.execute(query, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
@@ -136,40 +143,60 @@ def query3(conn: MySQLConnection):
 
 def query4(conn: MySQLConnection):
     cursor = conn.cursor()
+    d1 = datetime(2018, 9, 1)
+    d2 = datetime(2018, 9, 30)
 
     def preload_data():
-        deposit_sql = "SELECT id FROM deposits LIMIT 1"
-        cursor.execute(deposit_sql)
-        deposit = cursor.fetchone()
-        customer_sql = "SELECT id FROM customers WHERE full_name = %s"
-        cursor.execute(customer_sql, "Elizabeth")
-        customer = cursor.fetchone()
-        for i in range(30):
-            sql = "INSERT INTO payment_records (no_of_transaction, date_time, cid, did, price) " \
-                  "VALUES (%s, %s, %s, %s, %s)"
-            d1 = datetime(2018, 5, 5)
-            d2 = datetime(2018, 5, 25)
-            date = random_date(d1, d2)
-            value = (i, date, customer[0], deposit[0], 1234)
-            cursor.execute(sql, value)
+        # get one deposit
+        sql = "SELECT id FROM deposits LIMIT 1"
+        cursor.execute(sql)
+        deposit_id = cursor.fetchone()[0]
 
+        # get the customer id
+        sql = "SELECT id FROM customers WHERE full_name = %s"
+        cursor.execute(sql, "Elizabeth Test")
+        customer_id = cursor.fetchone()[0]
+
+        # get one car plate
+        sql = "SELECT plate FROM cars LIMIT 1"
+        cursor.execute(sql)
+        cplate = cursor.fetchone()[0]
+
+        # delete previous payment records with trans_no between 1 and 31 to avoid insertion errors
+        sql = "DELETE FROM payment_records WHERE no_of_transaction BETWEEN 1 AND 30"
+        cursor.execute(sql)
+        conn.commit()
+
+        date = d1 + timedelta(hours=0)
+        # insert payment and rent records
+        for i in range(1, 31):
+            date_from = get_fake_date_time(start=date, end=date + timedelta(days=1))
+            date_to = get_fake_date_time(start=date_from, end=date_from + timedelta(hours=3))
             sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
                   "VALUES (%s, %s, %s, %s, %s)"
-            cplate_sql = "SELECT plate FROM cars LIMIT 1"
-            cursor.execute(cplate_sql)
-            cplate = cursor.fetchone()
-            value = (date, random_date(date, d2), customer[0], cplate[0], 1234)
-            cursor.execute(sql, value)
+            val = (date_from, date_to, customer_id[0], cplate[0], randint(10, 100))
+            cursor.execute(sql, val)
+
+            pay_time = get_fake_date_time(start=date_from, end=date_to)
+            sql = "INSERT INTO payment_records (no_of_transaction, date_time, cid, did, price) " \
+                  "VALUES (%s, %s, %s, %s, %s)"
+            val = (i, pay_time, customer_id, deposit_id, randint(10, 100))
+            cursor.execute(sql, val)
+            date = date_to
         conn.commit()
 
     preload_data()
-
-    customer_sql = "SELECT id FROM customers WHERE full_name = %s"
-    cursor.execute(customer_sql, "Elizabeth")
-    customer = cursor.fetchone()
-
-    query = "SELECT * FROM payment_records WHERE cid = %s"
-    cursor.execute(query, customer[0])
+    query = "SELECT rr.id AS RentId, rr.date_to AS RentFromDateTime, rr.date_to AS RentToDateTime, " \
+            "pr.no_of_transaction AS NoOfTransaction, pr.date_time AS PaymentDateTime " \
+            "FROM rent_records AS rr " \
+            "INNER JOIN payment_records AS pr ON (pr.date_time BETWEEN rr.date_from AND rr.date_to) " \
+            "AND rr.cid = pr.cid " \
+            "INNER JOIN customers AS c ON rr.cid = c.id WHERE c.full_name = %s " \
+            "AND DATE(pr.date_time) BETWEEN DATE(%s) AND DATE(%s) " \
+            "GROUP BY rr.id HAVING COUNT(pr.no_of_transaction) > 1"
+    value = ("Elizabeth", d1, d2)
+    cursor.execute(query, value)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
 def query5(conn: MySQLConnection):
@@ -196,8 +223,8 @@ def query5(conn: MySQLConnection):
                   "VALUES (%s, %s, %s, %s, %s)"
             date_from = get_fake_date_time(start=date, end=date + timedelta(days=1))
             date_to = get_fake_date_time(start=date_from, end=date + timedelta(days=1))
-            value = (date_from, date_to, ids[randint(0, len(ids))], plates[randint(0, len(plates))], randint(1, 100))
-            cursor.execute(sql, value)
+            val = (date_from, date_to, ids[randint(0, len(ids))], plates[randint(0, len(plates))], randint(1, 100))
+            cursor.execute(sql, val)
         conn.commit()
 
     preload_data()
@@ -250,7 +277,7 @@ def query7(conn: MySQLConnection):
 
 def query8(conn: MySQLConnection):
     def preload_data():
-        pass  # TODO might need to preload data, yet check after testing
+        pass  # no need to preload data, use the sample data from the database
 
     preload_data()
     start_date = datetime(2018, 8, 1)
@@ -296,12 +323,47 @@ def query10(conn: MySQLConnection):
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
-def get_all_query_results():
-    return []
+def get_all_query_results(conn: MySQLConnection):
+    results = []
 
+    query_table, query_columns = query1(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_1', 'dataframe': df})
 
-def random_date(start, end):
-    delta = end - start
-    int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
-    random_second = randrange(int_delta)
-    return start + timedelta(seconds=random_second)
+    query_table, query_columns = query2(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_2', 'dataframe': df})
+
+    query_table, query_columns = query3(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_3', 'dataframe': df})
+
+    query_table, query_columns = query4(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_4', 'dataframe': df})
+
+    query_table, query_columns = query5(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_5', 'dataframe': df})
+
+    query_table, query_columns = query6(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_6', 'dataframe': df})
+
+    query_table, query_columns = query7(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_7', 'dataframe': df})
+
+    query_table, query_columns = query8(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_8', 'dataframe': df})
+
+    query_table, query_columns = query9(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_9', 'dataframe': df})
+
+    query_table, query_columns = query10(conn)
+    df = DataFrame(query_table, columns=query_columns)
+    results.append({'name': 'Query_10', 'dataframe': df})
+
+    return results
