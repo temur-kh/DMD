@@ -21,10 +21,10 @@ class SampleDatabase:
         no_of_plugs = 5
         no_of_car_parts = 100
         no_of_orders = 50
-        no_of_rent_records = 1000
+        no_of_rent_records = 5000
         no_of_charging_records = 300
         no_of_repair_records = 80
-        no_of_payment_records = 1000
+        no_of_payment_records = 5000
         no_of_plug_properties = 30
         no_of_car_part_properties = 100
         no_of_order_payments = 50
