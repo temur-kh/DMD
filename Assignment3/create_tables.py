@@ -4,7 +4,8 @@ import subprocess
 
 def create_database(db):
     cursor = db.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS `company`")
+    cursor.execute("DROP DATABASE `company`")
+    cursor.execute("CREATE DATABASE `company`")
     cursor.execute("USE `company`")
     cursor.execute("CREATE TABLE IF NOT EXISTS `plugs`("
                    "`model` VARCHAR(50) NOT NULL, "
