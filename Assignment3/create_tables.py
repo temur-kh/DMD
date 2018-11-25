@@ -73,11 +73,12 @@ def create_database(db):
                    "`username` VARCHAR(50) NOT NULL UNIQUE, "
                    "`full_name` VARCHAR(50) NOT NULL,"
                    "`email` VARCHAR(50) NOT NULL UNIQUE, "
-                   "`phone_number` VARCHAR(20) UNIQUE,"
+                   "`phone_number` VARCHAR(20) NOT NULL UNIQUE,"
                    "`bank_account` VARCHAR(50) NOT NULL UNIQUE,"
                    "`gps_location` VARCHAR(30) NOT NULL,"
                    "`address` VARCHAR(100) NOT NULL,"
                    "`nearest_station` INTEGER,"
+                   "PRIMARY KEY (`id`),"
                    "FOREIGN KEY (`nearest_station`) REFERENCES `charging_stations`(`id`) ON DELETE CASCADE "
                    "ON UPDATE CASCADE)")
 
