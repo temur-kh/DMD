@@ -1,6 +1,6 @@
 from mysql.connector.connection import MySQLConnection
 from datetime import datetime, timedelta, time
-from random import randint
+from random import randint, choice
 from pandas import DataFrame
 from sample_data.entity_classes import get_fake_date_time, getstr
 
@@ -19,7 +19,7 @@ def query1(conn: MySQLConnection):
               "email = %s OR phone_number = %s OR bank_account = %s "
         value = ("Liza", "Elizabeth Test", "elizabeth@gmail.com",
                  "123456789", "12341234")
-        cursor.execute(sql)
+        cursor.execute(sql, value)
         conn.commit()
 
         # insert a customer into table
@@ -58,14 +58,13 @@ def query1(conn: MySQLConnection):
         value = ("ANINAS", model[0], "red")
         cursor.execute(sql, value)
         conn.commit()
-        cplate = cursor.lastrowid
 
         # create a rent record between the customer and this car
         sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
               "VALUES (%s, %s, %s, %s, %s)"
         date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
         date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
-        value = (getstr(date_from), getstr(date_to), customer_id, cplate, randint(1, 100))
+        value = (getstr(date_from), getstr(date_to), customer_id, "ANINAS", randint(1, 100))
         cursor.execute(sql, value)
         conn.commit()
 
@@ -74,7 +73,7 @@ def query1(conn: MySQLConnection):
             "INNER JOIN cars AS car ON r.cplate = car.plate " \
             "INNER JOIN customers AS c ON r.cid = c.id " \
             "WHERE c.full_name = %s AND DATE(r.date_from) = DATE(%s) " \
-            "AND car.color = %s AND car.plate LIKE (%s + '%')"
+            "AND car.color = %s AND car.plate LIKE (CONCAT(%s, '%'))"
     val = ("Elizabeth Test", date, "red", "AN")
     cursor.execute(query, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
@@ -98,17 +97,17 @@ def query2(conn: MySQLConnection):
         date_times = [date + timedelta(hours=x) for x in range(24)]
         for i in range(len(rand_stations_id)):
             for date_time in date_times:
-                value = (rand_stations_id[i], randint(0, no_of_socket[i]), date_time)
+                value = (rand_stations_id[i], randint(0, no_of_socket[i]), getstr(date_time))
                 cursor.execute(sql, value)
         conn.commit()
 
     preload_data()
-    query = "SELECT CONCAT(HOUR(css.date_time), '-', HOUR(css.date_time + TIME('01:00:00'))) AS Period, " \
-            "(cs.total_no_of_sockets - AVG(css.no_of_available_sockets)) AS OccupiedSockets " \
+    query = "SELECT CONCAT(HOUR(css.date_time), 'h-', HOUR(css.date_time) + 1, 'h') AS Period, " \
+            "SUM(cs.total_no_of_sockets - css.no_of_available_sockets) AS OccupiedSockets " \
             "FROM charging_station_sockets AS css " \
             "INNER JOIN charging_stations AS cs ON css.station_id = cs.id " \
-            "WHERE DATE(css.date_time) = DATE(%s) GROUP BY HOUR(css.date_time)"
-    val = (date,)
+            "WHERE DATE(css.date_time) = DATE(%s) GROUP BY TIME(css.date_time)"
+    val = (getstr(date),)
     cursor.execute(query, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
@@ -128,8 +127,8 @@ def query3(conn: MySQLConnection):
           "(SELECT COUNT(DISTINCT cplate) FROM rent_records " \
           "WHERE (DATE(date_from) BETWEEN DATE(%s) AND DATE(%s)) AND " \
           "(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s)))/(SELECT COUNT(*) FROM cars) AS Evening"
-    d1 = datetime(2018, 5, 7)
-    d2 = datetime(2018, 5, 14)
+    d1 = getstr(datetime(2018, 9, 1))
+    d2 = getstr(datetime(2018, 9, 7))
     mor1 = time(7, 0)
     mor2 = time(10, 0)
     aft1 = time(12, 0)
@@ -154,7 +153,8 @@ def query4(conn: MySQLConnection):
 
         # get the customer id
         sql = "SELECT id FROM customers WHERE full_name = %s"
-        cursor.execute(sql, "Elizabeth Test")
+        val = ("Elizabeth Test",)
+        cursor.execute(sql, val)
         customer_id = cursor.fetchone()[0]
 
         # get one car plate
@@ -174,13 +174,13 @@ def query4(conn: MySQLConnection):
             date_to = get_fake_date_time(start=date_from, end=date_from + timedelta(hours=3))
             sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
                   "VALUES (%s, %s, %s, %s, %s)"
-            val = (date_from, date_to, customer_id[0], cplate[0], randint(10, 100))
+            val = (getstr(date_from), getstr(date_to), customer_id, cplate, randint(10, 100))
             cursor.execute(sql, val)
 
             pay_time = get_fake_date_time(start=date_from, end=date_to)
             sql = "INSERT INTO payment_records (no_of_transaction, date_time, cid, did, price) " \
                   "VALUES (%s, %s, %s, %s, %s)"
-            val = (i, pay_time, customer_id, deposit_id, randint(10, 100))
+            val = (i, getstr(pay_time), customer_id, deposit_id, randint(10, 100))
             cursor.execute(sql, val)
             date = date_to
         conn.commit()
@@ -194,7 +194,7 @@ def query4(conn: MySQLConnection):
             "INNER JOIN customers AS c ON rr.cid = c.id WHERE c.full_name = %s " \
             "AND DATE(pr.date_time) BETWEEN DATE(%s) AND DATE(%s) " \
             "GROUP BY rr.id HAVING COUNT(pr.no_of_transaction) > 1"
-    value = ("Elizabeth", d1, d2)
+    value = ("Elizabeth", getstr(d1), getstr(d2))
     cursor.execute(query, value)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
@@ -213,7 +213,7 @@ def query5(conn: MySQLConnection):
         plates = [x[0] for x in cursor.fetchall()]
 
         # remove all rent records on the date loaded by sample data
-        sql = "DELETE FROM rent_records WHERE DATE(%s) = DATE(%s)"
+        sql = "DELETE FROM rent_records WHERE DATE(date_from) = DATE(%s)"
         cursor.execute(sql, (date,))
         conn.commit()
 
@@ -223,7 +223,7 @@ def query5(conn: MySQLConnection):
                   "VALUES (%s, %s, %s, %s, %s)"
             date_from = get_fake_date_time(start=date, end=date + timedelta(days=1))
             date_to = get_fake_date_time(start=date_from, end=date + timedelta(days=1))
-            val = (date_from, date_to, ids[randint(0, len(ids))], plates[randint(0, len(plates))], randint(1, 100))
+            val = (date_from, date_to, choice(ids), choice(plates), randint(1, 100))
             cursor.execute(sql, val)
         conn.commit()
 
@@ -265,12 +265,13 @@ def query7(conn: MySQLConnection):
     preload_data()
     cursor = conn.cursor()
     # create variable in database - 10% of amount of all cars
-    sql = "SET @counter = 0.1 * (SELECT COUNT(*) FROM cars)"
-    cursor.execute(sql)  # TODO need to test the variable
+    sql = "SELECT 0.1 * COUNT(*) FROM cars"
+    cursor.execute(sql)
+    limit = int(cursor.fetchone()[0])
     sql = "SELECT cplate AS CarPlate, COUNT(rr.id) AS RentAmount FROM rent_records AS rr " \
           "WHERE DATE(rr.date_from) BETWEEN DATE(%s) AND DATE(%s) " \
-          "GROUP BY cplate ORDER BY RentAmount LIMIT @counter"
-    val = (start_first_month, end_third_month, start_first_month, end_third_month)
+          "GROUP BY cplate ORDER BY RentAmount LIMIT %s"
+    val = (start_first_month, end_third_month, limit)
     cursor.execute(sql, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
@@ -283,10 +284,10 @@ def query8(conn: MySQLConnection):
     start_date = datetime(2018, 8, 1)
     end_date = datetime(2018, 8, 31)
     cursor = conn.cursor()
-    sql = "SELECT rr.cid, COUNT(cr.id) FROM rent_records AS rr " \
+    sql = "SELECT rr.cid AS CustomerId, COUNT(cr.id) AS Amount FROM rent_records AS rr " \
           "INNER JOIN charge_records AS cr ON rr.cplate = cr.cplate " \
           "AND DATE(rr.date_from) = DATE(cr.date_time) " \
-          "WHERE DATE(cr.date_time) BETWEEN DATE(%s) AND DATE(%s)"
+          "WHERE DATE(cr.date_time) BETWEEN DATE(%s) AND DATE(%s) GROUP BY rr.id"
     val = (start_date, end_date)
     cursor.execute(sql, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
@@ -298,7 +299,7 @@ def query9(conn: MySQLConnection):
 
     preload_data()
     cursor = conn.cursor()
-    sql = "SELECT D.wid AS WorkshopID, D.type, SUM(D.amount) AS Amount " \
+    sql = "SELECT D.wid AS WorkshopID, D.type AS CarPartType, SUM(D.amount) AS Amount " \
           "FROM (SELECT d.amount, o.wid, p.type FROM order_details as d " \
           "INNER JOIN orders AS o ON d.order_id = o.id " \
           "INNER JOIN car_parts AS p ON p.trade_name = d.trade_name AND p.pid = d.pid) AS D " \
