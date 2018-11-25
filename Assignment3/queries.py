@@ -55,7 +55,7 @@ def query1(conn: MySQLConnection):
 
         sql = "INSERT INTO cars (plate, cmodel, color) " \
               "VALUES(%s, %s, %s)"
-        value = ("ANINAS", model[0], "red")
+        value = ("ANINAS123", model[0], "red")
         cursor.execute(sql, value)
         conn.commit()
 
@@ -64,7 +64,7 @@ def query1(conn: MySQLConnection):
               "VALUES (%s, %s, %s, %s, %s)"
         date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
         date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
-        value = (getstr(date_from), getstr(date_to), customer_id, "ANINAS", randint(1, 100))
+        value = (getstr(date_from), getstr(date_to), customer_id, "ANINAS123", randint(1, 100))
         cursor.execute(sql, value)
         conn.commit()
 
@@ -152,8 +152,8 @@ def query4(conn: MySQLConnection):
         deposit_id = cursor.fetchone()[0]
 
         # get the customer id
-        sql = "SELECT id FROM customers WHERE full_name = %s"
-        val = ("Elizabeth Test",)
+        sql = "SELECT id FROM customers WHERE username = %s"
+        val = ("Liza",)
         cursor.execute(sql, val)
         customer_id = cursor.fetchone()[0]
 

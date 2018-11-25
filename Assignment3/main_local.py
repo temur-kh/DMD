@@ -26,15 +26,13 @@ except mysql.connector.Error as err:
 
 print("Want to create database with tables? Enter 1;"
       "\n Want to Load from backup file? Enter 2;"
-      "\n Want just to run gui? Enter 3: ")
+      "\n Want just to run gui? Enter 3;"
+      "\n Want to create sample database only? Enter 4")
 choice = int(input())
 fake = Faker()
 
 if choice == 1:
     create_database(conn)
-    # cursor = conn.cursor()
-    # cursor.execute("USE `company`")
-    # cursor.close()
     database = SampleDatabase(conn, fake)
     database.create_data()
     database.upload()
@@ -43,6 +41,12 @@ elif choice == 2:
     database = SampleDatabase(conn, fake)
 elif choice == 3:
     database = SampleDatabase(conn, fake)
+elif choice == 4:
+    create_database(conn)
+    database = SampleDatabase(conn, fake)
+    database.create_data()
+    database.upload()
+    exit(0)
 else:
     raise ValueError("Incorrect input!")
 
