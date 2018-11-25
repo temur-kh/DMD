@@ -30,12 +30,6 @@ def create_database(db):
                    "PRIMARY KEY (`plate`),"
                    "FOREIGN KEY (`cmodel`) REFERENCES `car_models`(`model`))")
 
-    # cursor.execute("CREATE TABLE IF NOT EXISTS `car_parts`("
-    #                "`trade_name` VARCHAR(30) NOT NULL, "
-    #                "`type` VARCHAR(30) NOT NULL, "
-    #                "`car_model` VARCHAR(30) NOT NULL, "
-    #                "PRIMARY KEY (`trade_name`))")
-
     cursor.execute("CREATE TABLE IF NOT EXISTS `providers`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
                    "`name` VARCHAR(50) NOT NULL, "
@@ -48,19 +42,10 @@ def create_database(db):
                    "`trade_name` VARCHAR(50) NOT NULL, "
                    "`pid` INTEGER NOT NULL, "
                    "`type` VARCHAR(30) NOT NULL, "
-                   # "`car_model` VARCHAR(30) NOT NULL, "
                    "`price` INTEGER NOT NULL, "
                    "PRIMARY KEY (`trade_name`, `pid`),"
                    "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`) ON DELETE CASCADE "
                    "ON UPDATE CASCADE)")
-
-    # cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_prices`("
-    #                "`trade_name` VARCHAR(30) NOT NULL, "
-    #                "`pid` INTEGER NOT NULL, "
-    #                "`price` INTEGER NOT NULL, "
-    #                "PRIMARY KEY (`trade_name`, `pid`),"
-    #                "FOREIGN KEY (`pid`) REFERENCES `providers`(`id`),"
-    #                "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `deposits`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
@@ -83,15 +68,14 @@ def create_database(db):
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `customers`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
-                   "`username` VARCHAR(50) NOT NULL, "
+                   "`username` VARCHAR(50) NOT NULL UNIQUE, "
                    "`full_name` VARCHAR(50) NOT NULL,"
-                   "`email` VARCHAR(50) NOT NULL, "
-                   "`phone_number` VARCHAR(20),"
-                   "`bank_account` VARCHAR(50) NOT NULL,"
+                   "`email` VARCHAR(50) NOT NULL UNIQUE, "
+                   "`phone_number` VARCHAR(20) UNIQUE,"
+                   "`bank_account` VARCHAR(50) NOT NULL UNIQUE,"
                    "`gps_location` VARCHAR(30) NOT NULL,"
                    "`address` VARCHAR(100) NOT NULL,"
                    "`nearest_station` INTEGER,"
-                   "PRIMARY KEY (`id`),"
                    "FOREIGN KEY (`nearest_station`) REFERENCES `charging_stations`(`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `workshops`("
@@ -108,7 +92,7 @@ def create_database(db):
                    "`cplate` VARCHAR(30) NOT NULL,"
                    "`distance` INTEGER NOT NULL,"
                    "PRIMARY KEY (`id`),"
-                   "FOREIGN KEY (`cid`) REFERENCES `customers`(`id`),"
+                   "FOREIGN KEY (`cid`) REFERENCES `customers`(`id`) ON DELETE CASCADE ,"
                    "FOREIGN KEY (`cplate`) REFERENCES `cars`(`plate`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `plug_properties`("
@@ -127,14 +111,6 @@ def create_database(db):
                    "PRIMARY KEY (`wid`, `trade_name`, `pid`),"
                    "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
                    "FOREIGN KEY (`trade_name`, `pid`) REFERENCES `car_parts`(`trade_name`, `pid`))")
-
-    # cursor.execute("CREATE TABLE IF NOT EXISTS `car_part_properties`("
-    #                "`wid` INTEGER NOT NULL, "
-    #                "`trade_name` VARCHAR(30) NOT NULL, "
-    #                "`amount` INTEGER NOT NULL DEFAULT 1, "
-    #                "PRIMARY KEY (`wid`, `trade_name`),"
-    #                "FOREIGN KEY (`wid`) REFERENCES `workshops`(`id`),"
-    #                "FOREIGN KEY (`trade_name`) REFERENCES `car_parts`(`trade_name`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `orders`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
