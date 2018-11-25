@@ -80,9 +80,9 @@ class TabBar(Frame):
         if self.current_tab:
             self.buttons[self.current_tab].config(relief=BASE)
             self.tabs[self.current_tab].pack_forget()  # hide the current tab
-            # if hasattr(self.tabs[self.current_tab], 'tabs'):
-            #     for tab in self.tabs[self.current_tab].tabs:
-            #         tab.pack_forget()
+            if hasattr(self.tabs[self.current_tab], 'tabs'):
+                for tab in self.tabs[self.current_tab].tabs:
+                    self.tabs[self.current_tab].tabs[tab].pack_forget()
         self.tabs[name].pack(side=LEFT)  # add the new tab to the display
         if hasattr(self.tabs[name], 'show'):
             self.tabs[name].show()
