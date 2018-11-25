@@ -7,7 +7,7 @@ from faker import Faker
 import tkinter as tk
 from gui_application.window import ApplicationWindow
 
-print("Input MySQL user name: ")
+print("Input MySQL user name: ", end="")
 user = input()
 pswd = getpass.getpass("Input password: ")
 conn = None
@@ -25,9 +25,9 @@ except mysql.connector.Error as err:
     exit(0)
 
 print("Want to create database with tables? Enter 1;"
-      "\n Want to Load from backup file? Enter 2;"
-      "\n Want just to run gui? Enter 3;"
-      "\n Want to create sample database only? Enter 4")
+      "\nWant to Load from backup file? Enter 2;"
+      "\nWant just to run gui? Enter 3;"
+      "\nWant to create sample database only? Enter 4: ", end="")
 choice = int(input())
 fake = Faker()
 
