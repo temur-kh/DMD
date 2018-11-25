@@ -30,7 +30,7 @@ class ApplicationWindow(tk.Frame):
         for db_table in database.tables:
             self.create_tab_with_table(tables_bar, left_side, db_table.name, db_table.get_dataframe())
 
-        for query in get_all_query_results():
+        for query in get_all_query_results(database.conn):
             self.create_tab_with_table(queries_bar, left_side, query['name'], query['dataframe'])
 
         self.set_config([self, left_side, right_side, queries_bar, tables_bar], self.default_config)

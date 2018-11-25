@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import errorcode
 import getpass
-from create_tables import create_database
+from create_tables import *
 from sample_data.sample_database import SampleDatabase
 from faker import Faker
 import tkinter as tk
@@ -23,12 +23,33 @@ except mysql.connector.Error as err:
     else:
         print(err)
     exit(0)
-create_database(conn)
 
+print("Want to create database with tables? Enter 1;"
+      "\n Want to Load from backup file? Enter 2;"
+      "\n Want just to run gui? Enter 3: ")
+choice = int(input())
 fake = Faker()
-database = SampleDatabase(conn, fake)
-database.create_data()  # uncomment if need to create sample data
-database.upload()       # uncomment if need to upload sample data
+
+if choice == 1:
+    create_database(conn)
+    # cursor = conn.cursor()
+    # cursor.execute("USE `company`")
+    # cursor.close()
+    database = SampleDatabase(conn, fake)
+    database.create_data()
+    database.upload()
+elif choice == 2:
+    load_backup(conn)
+    database = SampleDatabase(conn, fake)
+elif choice == 3:
+    database = SampleDatabase(conn, fake)
+else:
+    raise ValueError("Incorrect input!")
+
+cursor = conn.cursor()
+cursor.execute("USE `company`")
+cursor.close()
+
 root = tk.Tk()
 root.wm_title("DMD Assignment 3")
 window = ApplicationWindow(root, database)

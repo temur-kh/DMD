@@ -1,7 +1,13 @@
+from mysql.connector import MySQLConnection
+import subprocess
+
+
 def create_database(db):
     cursor = db.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS `company`")
+    cursor.execute("DROP DATABASE IF EXISTS `company`")
+    cursor.execute("CREATE DATABASE `company`")
     cursor.execute("USE `company`")
+    cursor.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
     cursor.execute("CREATE TABLE IF NOT EXISTS `plugs`("
                    "`model` VARCHAR(50) NOT NULL, "
                    "`shape` VARCHAR(30) NOT NULL, "
@@ -35,7 +41,7 @@ def create_database(db):
                    "`name` VARCHAR(50) NOT NULL, "
                    "`address` VARCHAR(100), "
                    "`phone_number` VARCHAR(20),"
-                   "`bank_account` VARCHAR(30) NOT NULL,"
+                   "`bank_account` VARCHAR(50) NOT NULL,"
                    "PRIMARY KEY (`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `car_parts`("
@@ -58,7 +64,7 @@ def create_database(db):
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `deposits`("
                    "`id` INTEGER NOT NULL AUTO_INCREMENT, "
-                   "`bank_account` VARCHAR(30) NOT NULL, "
+                   "`bank_account` VARCHAR(50) NOT NULL, "
                    "PRIMARY KEY (`id`))")
 
     cursor.execute("CREATE TABLE IF NOT EXISTS `charging_stations`("
@@ -81,7 +87,7 @@ def create_database(db):
                    "`full_name` VARCHAR(50) NOT NULL,"
                    "`email` VARCHAR(50) NOT NULL, "
                    "`phone_number` VARCHAR(20),"
-                   "`bank_account` VARCHAR(30) NOT NULL,"
+                   "`bank_account` VARCHAR(50) NOT NULL,"
                    "`gps_location` VARCHAR(30) NOT NULL,"
                    "`address` VARCHAR(100) NOT NULL,"
                    "`nearest_station` INTEGER,"
@@ -191,3 +197,14 @@ def create_database(db):
                    "FOREIGN KEY (`cid`) REFERENCES `customers`(`id`),"
                    "FOREIGN KEY (`did`) REFERENCES `deposits`(`id`))")
     cursor.close()
+
+
+def load_backup(conn: MySQLConnection):
+    cursor = conn.cursor()
+    cursor.execute("DROP DATABASE IF EXISTS `company`")
+    cursor.execute("CREATE DATABASE `company`")
+    proc = subprocess.Popen(["/bin/bash", 'restore_db.sh'])
+    proc.wait()
+    cursor.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
+    cursor.close()
+
