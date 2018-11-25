@@ -72,9 +72,9 @@ def query1(conn: MySQLConnection):
     query = "SELECT * FROM rent_records AS r " \
             "INNER JOIN cars AS car ON r.cplate = car.plate " \
             "INNER JOIN customers AS c ON r.cid = c.id " \
-            "WHERE c.full_name = %s AND DATE(r.date_from) = DATE(%s) " \
+            "WHERE c.username = %s AND DATE(r.date_from) = DATE(%s) " \
             "AND car.color = %s AND car.plate LIKE (CONCAT(%s, '%'))"
-    val = ("Elizabeth Test", date, "red", "AN")
+    val = ("Liza", date, "red", "AN")
     cursor.execute(query, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
