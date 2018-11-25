@@ -152,8 +152,8 @@ def query4(conn: MySQLConnection):
         deposit_id = cursor.fetchone()[0]
 
         # get the customer id
-        sql = "SELECT id FROM customers WHERE full_name = %s"
-        val = ("Elizabeth Test",)
+        sql = "SELECT id FROM customers WHERE username = %s"
+        val = ("Liza",)
         cursor.execute(sql, val)
         customer_id = cursor.fetchone()[0]
 
@@ -191,10 +191,10 @@ def query4(conn: MySQLConnection):
             "FROM rent_records AS rr " \
             "INNER JOIN payment_records AS pr ON (pr.date_time BETWEEN rr.date_from AND rr.date_to) " \
             "AND rr.cid = pr.cid " \
-            "INNER JOIN customers AS c ON rr.cid = c.id WHERE c.full_name = %s " \
+            "INNER JOIN customers AS c ON rr.cid = c.id WHERE c.username = %s " \
             "AND DATE(pr.date_time) BETWEEN DATE(%s) AND DATE(%s) " \
             "GROUP BY rr.id HAVING COUNT(pr.no_of_transaction) > 1"
-    value = ("Elizabeth", getstr(d1), getstr(d2))
+    value = ("Liza", getstr(d1), getstr(d2))
     cursor.execute(query, value)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
