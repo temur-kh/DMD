@@ -1,3 +1,7 @@
+from mysql.connector import MySQLConnection
+import subprocess
+
+
 def create_database(db):
     cursor = db.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS `company`")
@@ -191,3 +195,10 @@ def create_database(db):
                    "FOREIGN KEY (`cid`) REFERENCES `customers`(`id`),"
                    "FOREIGN KEY (`did`) REFERENCES `deposits`(`id`))")
     cursor.close()
+
+
+def load_backup(conn: MySQLConnection):
+    cursor = conn.cursor()
+    cursor.execute("DROP DATABASE company")
+    conn.commit()
+    subprocess.call(['./restore_db.sh'])
