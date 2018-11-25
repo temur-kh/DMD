@@ -4,9 +4,10 @@ import subprocess
 
 def create_database(db):
     cursor = db.cursor()
-    cursor.execute("DROP DATABASE `company`")
+    cursor.execute("DROP DATABASE IF EXISTS `company`")
     cursor.execute("CREATE DATABASE `company`")
     cursor.execute("USE `company`")
+    cursor.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
     cursor.execute("CREATE TABLE IF NOT EXISTS `plugs`("
                    "`model` VARCHAR(50) NOT NULL, "
                    "`shape` VARCHAR(30) NOT NULL, "
@@ -200,6 +201,10 @@ def create_database(db):
 
 def load_backup(conn: MySQLConnection):
     cursor = conn.cursor()
-    cursor.execute("DROP DATABASE company")
-    conn.commit()
-    subprocess.call(['./restore_db.sh'])
+    cursor.execute("DROP DATABASE IF EXISTS `company`")
+    cursor.execute("CREATE DATABASE `company`")
+    proc = subprocess.Popen(["/bin/bash", 'restore_db.sh'])
+    proc.wait()
+    cursor.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
+    cursor.close()
+

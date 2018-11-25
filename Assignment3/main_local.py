@@ -32,6 +32,9 @@ fake = Faker()
 
 if choice == 1:
     create_database(conn)
+    # cursor = conn.cursor()
+    # cursor.execute("USE `company`")
+    # cursor.close()
     database = SampleDatabase(conn, fake)
     database.create_data()
     database.upload()
@@ -42,6 +45,10 @@ elif choice == 3:
     database = SampleDatabase(conn, fake)
 else:
     raise ValueError("Incorrect input!")
+
+cursor = conn.cursor()
+cursor.execute("USE `company`")
+cursor.close()
 
 root = tk.Tk()
 root.wm_title("DMD Assignment 3")
