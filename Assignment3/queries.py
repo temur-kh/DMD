@@ -208,6 +208,27 @@ def query5(conn: MySQLConnection):
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
+def query6(conn: MySQLConnection):
+    def preload_data():
+        pass  # no need to preload data, use the sample data from the database
+
+    preload_data()
+    mor1 = time(7, 0)
+    mor2 = time(10, 0)
+    aft1 = time(12, 0)
+    aft2 = time(14, 0)
+    eve1 = time(17, 0)
+    eve2 = time(19, 0)
+    cursor = conn.cursor()
+    sql = "SELECT COUNT(IF(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s), 1, NULL)) AS MorningTravels," \
+          "COUNT(IF(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s), 1, NULL)) AS AfternoonTravels," \
+          "COUNT(IF(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s), 1, NULL)) AS EveningTravels " \
+          "FROM rent_records"
+    value = (mor1, mor2, aft1, aft2, eve1, eve2)
+    cursor.execute(sql, value)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
+
+
 def query7(conn: MySQLConnection):
     def preload_data():
         pass  # no need to preload data, use the sample data from the database
