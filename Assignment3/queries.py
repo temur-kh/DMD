@@ -6,6 +6,7 @@ from sample_data.entity_classes import get_fake_date_time, getstr
 
 def query1(conn: MySQLConnection):
     cursor = conn.cursor()
+    date = datetime(2018, 11, 27, 0, 0, 0)
 
     def preload_data():
         # get one charging station to be used for nearest_station attribute of customers
@@ -29,10 +30,10 @@ def query1(conn: MySQLConnection):
         rand_cplates = [car[0] for car in cursor.fetchall()]
 
         # create 5 rent records between the customer and chosen cars on a specific day
-        date_time = datetime(2018, 11, 27, 0, 0, 0)
+        date_time = date
+        sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
+              "VALUES (%s, %s, %s, %s, %s)"
         for i in range(5):
-            sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
-                  "VALUES (%s, %s, %s, %s, %s)"
             date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
             date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
             value = (getstr(date_from), getstr(date_to), customer_id, rand_cplates[i], randint(1, 100))
@@ -63,18 +64,18 @@ def query1(conn: MySQLConnection):
 
     preload_data()
     query = "SELECT * FROM rent_records AS r " \
-            "INNER JOIN cars AS car ON r.cplate=car.plate " \
-            "INNER JOIN customers AS c ON r.cid=c.id " \
-            "WHERE c.full_name=%s AND DATE(r.date_from)=DATE(%s) " \
-            "AND car.color=%s AND car.plate LIKE (%s+'%')"
-    val = ("Elizabeth", datetime(2018, 11, 27), "red", "AN")
+            "INNER JOIN cars AS car ON r.cplate = car.plate " \
+            "INNER JOIN customers AS c ON r.cid = c.id " \
+            "WHERE c.full_name = %s AND DATE(r.date_from) = DATE(%s) " \
+            "AND car.color = %s AND car.plate LIKE (%s + '%')"
+    val = ("Elizabeth", date, "red", "AN")
     cursor.execute(query, val)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
 def query2(conn: MySQLConnection):
     cursor = conn.cursor()
-    date = datetime(2018, 5, 5, 0, 0, 0)
+    date = datetime(2018, 10, 5, 0, 0, 0)
 
     def preload_data():
         # get five charging stations to be used for statistics
@@ -87,23 +88,39 @@ def query2(conn: MySQLConnection):
 
         sql = "INSERT INTO charging_station_sockets (station_id, no_of_available_sockets, date_time) " \
               "VALUES (%s, %s, %s)"
-
+        date_times = [date + timedelta(hours=x) for x in range(24)]
         for i in range(len(rand_stations_id)):
-            for j in range(randint(1, no_of_socket[i])):
-                value = (rand_stations_id[i], randint(0, no_of_socket[j]), date + timedelta(hours=randint(0, 23)))
+            for date_time in date_times:
+                value = (rand_stations_id[i], randint(0, no_of_socket[i]), date_time)
                 cursor.execute(sql, value)
         conn.commit()
+
     preload_data()
+    sql = "SELECT CONCAT(HOUR(css.date_time), '-', HOUR(css.date_time + TIME('01:00:00'))) AS Period, " \
+          "(cs.total_no_of_sockets - AVG(css.no_of_available_sockets)) AS OccupiedSockets " \
+          "FROM charging_station_sockets AS css " \
+          "INNER JOIN charging_stations AS cs ON css.station_id = cs.id " \
+          "WHERE DATE(css.date_time) = DATE(%s) GROUP BY HOUR(css.date_time)"
+    val = (date,)
+    cursor.execute(sql, val)
+    return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
 def query3(conn: MySQLConnection):
-    cursor = conn.cursor()
-
     def preload_data():
-        return
+        return  # no need to preload data, use the sample data from the database
+
     preload_data()
-    sql = "SELECT * FROM (SELECT * FROM rent_records WHERE DATE(date_from) BETWEEN %s AND %s) AS T " \
-          "GROUP BY date_from BETWEEN %s AND %s, date_from BETWEEN %s AND %s, date_from BETWEEN %s AND %s"
+    cursor = conn.cursor()
+    sql = "SELECT (SELECT COUNT(DISTINCT cplate) FROM rent_records " \
+          "WHERE (DATE(date_from) BETWEEN DATE(%s) AND DATE(%s)) AND " \
+          "(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s)))/(SELECT COUNT(*) FROM cars) AS Morning, " \
+          "(SELECT COUNT(DISTINCT cplate) FROM rent_records " \
+          "WHERE (DATE(date_from) BETWEEN DATE(%s) AND DATE(%s)) AND " \
+          "(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s)))/(SELECT COUNT(*) FROM cars) AS Afternoon, " \
+          "(SELECT COUNT(DISTINCT cplate) FROM rent_records " \
+          "WHERE (DATE(date_from) BETWEEN DATE(%s) AND DATE(%s)) AND " \
+          "(TIME(date_from) BETWEEN TIME(%s) AND TIME(%s)))/(SELECT COUNT(*) FROM cars) AS Evening"
     d1 = datetime(2018, 5, 7)
     d2 = datetime(2018, 5, 14)
     mor1 = time(7, 0)
@@ -112,7 +129,7 @@ def query3(conn: MySQLConnection):
     aft2 = time(14, 0)
     eve1 = time(17, 0)
     eve2 = time(19, 0)
-    value = (d1, d2, mor1, mor2, aft1, aft2, eve1, eve2)
+    value = (d1, d2, mor1, mor2, d1, d2, aft1, aft2, d1, d2, eve1, eve2)
     cursor.execute(sql, value)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
@@ -144,6 +161,7 @@ def query4(conn: MySQLConnection):
             value = (date, random_date(date, d2), customer[0], cplate[0], 1234)
             cursor.execute(sql, value)
         conn.commit()
+
     preload_data()
 
     customer_sql = "SELECT id FROM customers WHERE full_name = %s"
@@ -156,28 +174,37 @@ def query4(conn: MySQLConnection):
 
 def query5(conn: MySQLConnection):
     cursor = conn.cursor()
+    date = datetime(2018, 11, 27, 0, 0, 0)
 
     def preload_data():
-        sql = "SELECT * FROM customers LIMIT 5"
+        sql = "SELECT * FROM customers LIMIT 100"
         cursor.execute(sql)
         ids = [x[0] for x in cursor.fetchall()]
 
-        sql = "SELECT * FROM cars LIMIT 10"
+        sql = "SELECT * FROM cars LIMIT 50"
         cursor.execute(sql)
         plates = [x[0] for x in cursor.fetchall()]
-        date_time = datetime(2018, 11, 27, 0, 0, 0)
-        for i in range(8):
+
+        # remove all rent records on the date loaded by sample data
+        sql = "DELETE FROM rent_records WHERE DATE(%s) = DATE(%s)"
+        cursor.execute(sql, (date,))
+        conn.commit()
+
+        # insert random rent records on the date with random pairs of customers and cars
+        for i in range(100):
             sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
                   "VALUES (%s, %s, %s, %s, %s)"
-            date_from = get_fake_date_time(start=date_time, end=date_time + timedelta(hours=3))
-            date_to = get_fake_date_time(start=date_from, end=date_time + timedelta(hours=3))
+            date_from = get_fake_date_time(start=date, end=date + timedelta(days=1))
+            date_to = get_fake_date_time(start=date_from, end=date + timedelta(days=1))
             value = (date_from, date_to, ids[randint(0, len(ids))], plates[randint(0, len(plates))], randint(1, 100))
             cursor.execute(sql, value)
         conn.commit()
-    preload_data()
 
-    query = "SELECT AVG(MINUTE(TIMEDIFF(date_from, date_to))) FROM rent_records WHERE DATE(date_from) = %s"
-    cursor.execute(query, datetime(2018, 11, 27))
+    preload_data()
+    query = "SELECT AVG(MINUTE(TIMEDIFF(date_from, date_to))) AS AvgTripDurationInMinutes " \
+            "FROM rent_records WHERE DATE(date_from) = %s"
+    value = (date,)
+    cursor.execute(query, value)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
