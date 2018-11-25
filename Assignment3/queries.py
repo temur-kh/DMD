@@ -299,11 +299,12 @@ def query9(conn: MySQLConnection):
 
     preload_data()
     cursor = conn.cursor()
-    sql = "SELECT D.wid AS WorkshopID, D.type AS CarPartType, SUM(D.amount) AS Amount " \
+    sql = "SELECT wid AS WorkshopID, type AS CarPartType, MAX(amount) AS Amount " \
+          "FROM (SELECT D.wid, D.type, SUM(D.amount) AS amount " \
           "FROM (SELECT d.amount, o.wid, p.type FROM order_details as d " \
           "INNER JOIN orders AS o ON d.order_id = o.id " \
           "INNER JOIN car_parts AS p ON p.trade_name = d.trade_name AND p.pid = d.pid) AS D " \
-          "GROUP BY D.wid, D.type ORDER BY Amount DESC"
+          "GROUP BY D.wid, D.type ORDER BY Amount DESC) AS D2 GROUP BY WorkshopID"
     cursor.execute(sql)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
