@@ -162,5 +162,3 @@ class SampleTable:
         df.columns = [i[0] for i in cursor.description]
         cursor.close()
         return df
-
-

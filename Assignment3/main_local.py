@@ -60,5 +60,3 @@ root.wm_title("DMD Assignment 3")
 window = ApplicationWindow(root, database)
 window.pack()
 tk.mainloop()
-
-

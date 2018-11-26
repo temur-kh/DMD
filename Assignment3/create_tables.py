@@ -189,4 +189,3 @@ def load_backup(conn: MySQLConnection):
     proc.wait()
     cursor.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
     cursor.close()
-
