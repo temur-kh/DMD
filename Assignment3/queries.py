@@ -69,7 +69,8 @@ def query1(conn: MySQLConnection):
         conn.commit()
 
     preload_data()
-    query = "SELECT * FROM rent_records AS r " \
+    query = "SELECT car.plate AS Plate, car.cmodel AS Model, car.color AS Color " \
+            "FROM rent_records AS r " \
             "INNER JOIN cars AS car ON r.cplate = car.plate " \
             "INNER JOIN customers AS c ON r.cid = c.id " \
             "WHERE c.username = %s AND DATE(r.date_from) = DATE(%s) " \
@@ -277,19 +278,48 @@ def query7(conn: MySQLConnection):
 
 
 def query8(conn: MySQLConnection):
-    def preload_data():
-        pass  # no need to preload data, use the sample data from the database
-
-    preload_data()
+    cursor = conn.cursor()
     start_date = datetime(2018, 8, 1)
     end_date = datetime(2018, 8, 31)
-    cursor = conn.cursor()
-    sql = "SELECT rr.cid AS CustomerId, COUNT(cr.id) AS Amount FROM rent_records AS rr " \
-          "INNER JOIN charge_records AS cr ON rr.cplate = cr.cplate " \
-          "AND DATE(rr.date_from) = DATE(cr.date_time) " \
-          "WHERE DATE(cr.date_time) BETWEEN DATE(%s) AND DATE(%s) GROUP BY rr.id"
-    val = (start_date, end_date)
-    cursor.execute(sql, val)
+
+    def preload_data():
+        # get one customer_id to demostrate how our query works
+        sql = "SELECT id FROM customers WHERE username = %s"
+        val = ("Liza",)
+        cursor.execute(sql, val)
+        customer_id = cursor.fetchone()[0]
+        # get 10 car plates to add them to renting and charge records
+        sql = "SELECT plate FROM cars ORDER BY RAND() LIMIT 10"
+        cursor.execute(sql)
+        cplates = [car[0] for car in cursor.fetchall()]
+        # get one random charging station id to add it to charge records
+        sql = "SELECT id FROM charging_stations ORDER BY RAND() LIMIT 1"
+        cursor.execute(sql)
+        station_id = cursor.fetchone()[0]
+
+        rent_sql = "INSERT INTO rent_records (date_from, date_to, cid, cplate, distance) " \
+                   "VALUES (%s, %s, %s, %s, %s)"
+        charge_sql = "INSERT INTO charge_records (date_time, sid, cplate, price) " \
+                     "VALUES (%s, %s, %s, %s)"
+        for cplate in cplates:
+            # insert rent record
+            date_from = get_fake_date_time(start=start_date, end=end_date - timedelta(days=1, hours=3))
+            date_to = get_fake_date_time(start=date_from, end=date_from + timedelta(hours=2, minutes=59))
+            val = (getstr(date_from), getstr(date_to), customer_id, cplate, randint(10, 100))
+            cursor.execute(rent_sql, val)
+            # insert charge record the same day of rent record
+            date_time = get_fake_date_time(start=date_from.date(), end=date_from.date() + timedelta(hours=12))
+            val = (getstr(date_time), station_id, cplate, randint(10, 100))
+            cursor.execute(charge_sql, val)
+        conn.commit()
+
+    preload_data()
+    query = "SELECT rr.cid AS CustomerId, COUNT(cr.id) AS Amount FROM rent_records AS rr " \
+            "INNER JOIN charge_records AS cr ON rr.cplate = cr.cplate " \
+            "AND DATE(rr.date_from) = DATE(cr.date_time) " \
+            "WHERE DATE(cr.date_time) BETWEEN DATE(%s) AND DATE(%s) GROUP BY rr.cid"
+    value = (start_date, end_date)
+    cursor.execute(query, value)
     return cursor.fetchall(), [i[0] for i in cursor.description]
 
 
