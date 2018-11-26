@@ -2,7 +2,7 @@ from mysql.connector.connection import MySQLConnection
 from datetime import datetime, timedelta, time
 from random import randint, choice
 from pandas import DataFrame
-from sample_data.entity_classes import get_fake_date_time, getstr
+from utils import get_fake_date_time, getstr
 
 
 def query1(conn: MySQLConnection):
