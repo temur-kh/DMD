@@ -54,6 +54,7 @@ cursor = conn.cursor()
 cursor.execute("USE `company`")
 cursor.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
 cursor.close()
+conn.commit()
 
 root = tk.Tk()
 root.wm_title("DMD Assignment 3")
