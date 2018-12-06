@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 class SampleDatabase:
 
-    def __init__(self, conn: MySQLConnection, fake=Faker, **kwargs):
+    def __init__(self, conn: MySQLConnection, fake=Faker(), **kwargs):
         self.conn = conn
         self.fake = fake
         # initialize numbers of records in each table
