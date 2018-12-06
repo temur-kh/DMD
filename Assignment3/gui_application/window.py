@@ -1,3 +1,14 @@
+"""
+This module contains a class to create an application window with tables, tabbars and tabs.
+
+File name: window.py
+Author: Temur Kholmatov
+Email: t.holmatov@innopolis.ru
+Course: Data Modeling and Databases
+Python Version: 3.5
+
+"""
+
 import tkinter as tk
 from .tkinter_tabs import *
 from sample_data.sample_database import SampleDatabase

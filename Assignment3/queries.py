@@ -1,3 +1,15 @@
+"""
+This module contains implementations of queries from the project terms of reference.
+Most of the methods have implemented inner method preload_data() to preload specific data for testing.
+
+File name: queries.py
+Author: Temur Kholmatov, Rishat Maksudov
+Email: t.holmatov@innopolis.ru, r.maksudov@innopolis.ru
+Course: Data Modeling and Databases
+Python Version: 3.5
+
+"""
+
 from mysql.connector.connection import MySQLConnection
 from datetime import datetime, timedelta, time
 from random import randint, choice

@@ -1,3 +1,14 @@
+"""
+This module contains some widely used functions.
+
+File name: utils.py
+Author: Temur Kholmatov
+Email: t.holmatov@innopolis.ru
+Course: Data Modeling and Databases
+Python Version: 3.5
+
+"""
+
 from faker import Faker
 from datetime import datetime
 
