@@ -1,3 +1,7 @@
+"""
+Main module cannot be used without a remote server with MySQL and a database 'company'.
+"""
+
 import mysql.connector
 
 from sample_data.sample_database import SampleDatabase

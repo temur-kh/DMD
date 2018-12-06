@@ -18,7 +18,8 @@ root
 -->Tab    (Place holder for content)
     -->content (content of the tab; parent=Tab)
 etc.
-The module was updated by Temur Kholmatov
+
+The module was modified by Temur Kholmatov, email: t.holmatov@innopolis.ru
 '''
 
 from tkinter import *
@@ -68,7 +69,7 @@ class TabBar(Frame):
             self.current_tab = None
             self.tabs[tabname].pack_forget()
             del self.tabs[tabname]
-            self.switch_tab(self.tabs.keys()[0])
+            self.switch_tab(list(self.tabs.keys())[0])
 
         else:
             del self.tabs[tabname]
@@ -80,10 +81,12 @@ class TabBar(Frame):
         if self.current_tab:
             self.buttons[self.current_tab].config(relief=BASE)
             self.tabs[self.current_tab].pack_forget()  # hide the current tab
+            # if exists, hide tabs of sub-bars
             if hasattr(self.tabs[self.current_tab], 'tabs'):
                 for tab in self.tabs[self.current_tab].tabs:
                     self.tabs[self.current_tab].tabs[tab].pack_forget()
         self.tabs[name].pack(side=LEFT)  # add the new tab to the display
+        # if exists, show tabs of sub-bars
         if hasattr(self.tabs[name], 'show'):
             self.tabs[name].show()
         self.current_tab = name  # set the current tab to itself

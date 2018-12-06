@@ -1,3 +1,15 @@
+"""
+This module contains a method to create tables in a database Company
+and a method to restore a database from a backup.
+
+File name: entity_classes.py
+Author: Abdurasul Rakhimov
+Email: a.rahimov@innopolis.ru
+Course: Data Modeling and Databases
+Python Version: 3.5
+
+"""
+
 from mysql.connector import MySQLConnection
 import subprocess
 

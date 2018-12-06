@@ -1,3 +1,16 @@
+"""
+This module contains two classes used to create a database:
+SampleDatabase: a class to create fake data and upload it to a database
+SampleTable: a class to create fake data, upload data and create a DataFrame object from it.
+
+File name: sample_database.py
+Author: Temur Kholmatov
+Email: t.holmatov@innopolis.ru
+Course: Data Modeling and Databases
+Python Version: 3.5
+
+"""
+
 from .entity_classes import *
 from faker import Faker
 from random import choice

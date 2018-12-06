@@ -1,3 +1,7 @@
+"""
+This module is to be started first.
+"""
+
 import mysql.connector
 from mysql.connector import errorcode
 import getpass
