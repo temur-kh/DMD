@@ -133,7 +133,7 @@ class SampleTable:
 
     def __in_records(self, record):
         for other in self.records:
-            if record.dublicates(other):
+            if record.duplicates(other):
                 return True
         return False
 

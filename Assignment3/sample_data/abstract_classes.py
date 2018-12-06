@@ -8,5 +8,5 @@ class Entity(ABC):
         pass
 
     @abstractmethod
-    def dublicates(self, other):
+    def duplicates(self, other):
         pass
