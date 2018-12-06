@@ -1,3 +1,5 @@
 */venv/*
 */.idea/*
 */__pycache__/*
+Assignment3/gui_application/__pycache__/
+Assignment3/sample_data/__pycache__/
