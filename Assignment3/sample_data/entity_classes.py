@@ -1,3 +1,22 @@
+"""
+This module contains classes that are used to create objects of some entities
+to be inserted in the database tables.
+
+All classes inherit from abstract class Entity and initialize bodies of such methods and functions like:
+__init__(): initialization of an object (has an optional parameter fake and may have some obligatory parameters),
+save(): saves created object in the database,
+duplicates(): implements comparison function to check object for duplicates.
+
+Most of the classes use Faker package to create fake data.
+
+File name: entity_classes.py
+Author: Temur Kholmatov
+Email: t.holmatov@innopolis.ru
+Course: Data Modeling and Databases
+Python Version: 3.5
+
+"""
+
 from .abstract_classes import Entity
 from utils import *
 from faker import Faker
@@ -19,17 +38,19 @@ class Customer(Entity):
         self.nearest_station = nearest_station
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO customers " \
-              "(full_name, phone_number, email, bank_account, username, gps_location, address, nearest_station)" \
-              "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        val = (self.name, self.phone_number, self.email, self.bank_account,
-               self.username, self.gps_location, self.address, self.nearest_station.id)
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO customers " \
+                  "(full_name, phone_number, email, bank_account, username, gps_location, address, nearest_station)" \
+                  "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            val = (self.name, self.phone_number, self.email, self.bank_account,
+                   self.username, self.gps_location, self.address, self.nearest_station.id)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.bank_account == other.bank_account or \
                self.phone_number == other.phone_number or self.username == other.username
 
@@ -40,16 +61,16 @@ class Deposit(Entity):
         self.bank_account = fake.credit_card_number()
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO deposits " \
-              "(bank_account) " \
-              "VALUES (%s)"
-        val = (self.bank_account,)
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO deposits (bank_account) VALUES (%s)"
+            val = (self.bank_account,)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.bank_account == other.bank_account
 
 
@@ -59,17 +80,21 @@ class CarModel(Entity):
         self.rent_price = randint(10, 100)
         self.charging_capacity = randint(100, 300)
         self.plug = plug
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO car_models " \
-              "(model, rent_price, charging_capacity, pmodel) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.model, self.rent_price, self.charging_capacity, self.plug.model)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO car_models " \
+                  "(model, rent_price, charging_capacity, pmodel) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.model, self.rent_price, self.charging_capacity, self.plug.model)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.model == other.model
 
 
@@ -78,17 +103,21 @@ class Car(Entity):
         self.plate = fake.license_plate()
         self.car_model = car_model
         self.color = fake.safe_color_name()
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO cars " \
-              "(plate, cmodel, color) " \
-              "VALUES (%s, %s, %s)"
-        val = (self.plate, self.car_model.model, self.color)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO cars " \
+                  "(plate, cmodel, color) " \
+                  "VALUES (%s, %s, %s)"
+            val = (self.plate, self.car_model.model, self.color)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.plate == other.plate
 
 
@@ -100,16 +129,18 @@ class ChargingStation(Entity):
         self.total_no_of_sockets = randint(1, 25)
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO charging_stations " \
-              "(gps_location, price_per_amount, total_no_of_sockets) " \
-              "VALUES (%s, %s, %s)"
-        val = (self.gps_location, self.price_per_amount, self.total_no_of_sockets)
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO charging_stations " \
+                  "(gps_location, price_per_amount, total_no_of_sockets) " \
+                  "VALUES (%s, %s, %s)"
+            val = (self.gps_location, self.price_per_amount, self.total_no_of_sockets)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.gps_location == other.gps_location
 
 
@@ -119,17 +150,20 @@ class Plug(Entity):
         self.shape = fake.random_uppercase_letter()
         self.size = fake.random_digit_not_null()
         self.charging_speed = randint(5, 10)
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO plugs " \
-              "(model, shape, size, charging_speed) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.model, self.shape, self.size, self.charging_speed)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO plugs " \
+                  "(model, shape, size, charging_speed) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.model, self.shape, self.size, self.charging_speed)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.model == other.model
 
 
@@ -140,16 +174,18 @@ class Workshop(Entity):
         self.available_timing = randint(0, 24)
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO workshops " \
-              "(location, available_timing) " \
-              "VALUES (%s, %s)"
-        val = (self.location, self.available_timing)
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO workshops " \
+                  "(location, available_timing) " \
+                  "VALUES (%s, %s)"
+            val = (self.location, self.available_timing)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.location == other.location
 
 
@@ -162,16 +198,18 @@ class Provider(Entity):
         self.bank_account = fake.credit_card_number()
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO providers " \
-              "(name, address, phone_number, bank_account) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.name, self.address, self.phone_number, self.bank_account)
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO providers " \
+                  "(name, address, phone_number, bank_account) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.name, self.address, self.phone_number, self.bank_account)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.name == other.name or self.phone_number == other.phone_number or \
                self.bank_account == other.bank_account
 
@@ -182,18 +220,22 @@ class CarPart(Entity):
         self.provider = provider
         self.type = fake.random_element(elements=tuple(get_car_part_names()))
         self.price = randint(25, 500)
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO car_parts " \
-              "(trade_name, pid, type, price) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.trade_name, self.provider.id, self.type, self.price)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO car_parts " \
+                  "(trade_name, pid, type, price) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.trade_name, self.provider.id, self.type, self.price)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
-        return self.trade_name == other.trade_name and self.provider.dublicates(other.provider)
+    def duplicates(self, other):
+        return self.trade_name == other.trade_name and self.provider.duplicates(other.provider)
 
 
 class Order(Entity):
@@ -205,16 +247,18 @@ class Order(Entity):
         self.payment = None
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO orders " \
-              "(wid, pid, date_time) " \
-              "VALUES (%s, %s, %s)"
-        val = (self.workshop.id, self.provider.id, getstr(self.date_time))
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO orders " \
+                  "(wid, pid, date_time) " \
+                  "VALUES (%s, %s, %s)"
+            val = (self.workshop.id, self.provider.id, getstr(self.date_time))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return False  # seems no checking is needed
 
 
@@ -230,18 +274,20 @@ class RentRecord(Entity):
                                           end=self.date_from + timedelta(days=1))
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO rent_records " \
-              "(cid, cplate, distance, date_from, date_to) " \
-              "VALUES (%s, %s, %s, %s, %s)"
-        val = (self.customer.id, self.car.plate, self.distance,
-               getstr(self.date_from), getstr(self.date_to))
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO rent_records " \
+                  "(cid, cplate, distance, date_from, date_to) " \
+                  "VALUES (%s, %s, %s, %s, %s)"
+            val = (self.customer.id, self.car.plate, self.distance,
+                   getstr(self.date_from), getstr(self.date_to))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
-        return (self.customer.dublicates(other.customer) or self.car.dublicates(other.car)) and \
+    def duplicates(self, other):
+        return (self.customer.duplicates(other.customer) or self.car.duplicates(other.car)) and \
                ((self.date_from <= other.date_from <= self.date_to) or
                 (self.date_from <= other.date_to <= self.date_to) or
                 (other.date_from <= self.date_from <= other.date_to) or
@@ -257,16 +303,18 @@ class ChargingRecord(Entity):
         self.date_time = get_fake_date_time(fake)
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO charge_records " \
-              "(sid, cplate, price, date_time) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.charging_station.id, self.car.plate, self.price, getstr(self.date_time))
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO charge_records " \
+                  "(sid, cplate, price, date_time) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.charging_station.id, self.car.plate, self.price, getstr(self.date_time))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return False  # need more complicated checking
 
 
@@ -279,16 +327,18 @@ class RepairRecord(Entity):
         self.date_time = get_fake_date_time(fake)
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO repair_records " \
-              "(wid, cplate, price, date_time) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.workshop.id, self.car.plate, self.price, getstr(self.date_time))
-        cursor.execute(sql, val)
-        conn.commit()
-        self.id = cursor.lastrowid
+        if not self.id:
+            cursor = conn.cursor()
+            sql = "INSERT INTO repair_records " \
+                  "(wid, cplate, price, date_time) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.workshop.id, self.car.plate, self.price, getstr(self.date_time))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.id = cursor.lastrowid
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return False  # seems no checking is needed or it is too complicated for a moment
 
 
@@ -299,17 +349,21 @@ class PaymentRecord(Entity):
         self.deposit = deposit
         self.price = randint(10, 10000)
         self.date_time = get_fake_date_time(fake)
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO payment_records " \
-              "(no_of_transaction, cid, did, price, date_time) " \
-              "VALUES (%s, %s, %s, %s, %s)"
-        val = (self.transaction, self.customer.id, self.deposit.id, self.price, getstr(self.date_time))
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO payment_records " \
+                  "(no_of_transaction, cid, did, price, date_time) " \
+                  "VALUES (%s, %s, %s, %s, %s)"
+            val = (self.transaction, self.customer.id, self.deposit.id, self.price, getstr(self.date_time))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.transaction == other.transaction
 
 
@@ -319,19 +373,23 @@ class PlugProperty(Entity):
         self.plug = plug
         self.amount = randint(1, 10)
         _ = fake
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO plug_properties " \
-              "(sid, pmodel, amount) " \
-              "VALUES (%s, %s, %s)"
-        val = (self.charging_station.id, self.plug.model, self.amount)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO plug_properties " \
+                  "(sid, pmodel, amount) " \
+                  "VALUES (%s, %s, %s)"
+            val = (self.charging_station.id, self.plug.model, self.amount)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
-        return self.charging_station.dublicates(other.charging_station) and \
-               self.plug.dublicates(other.plug)
+    def duplicates(self, other):
+        return self.charging_station.duplicates(other.charging_station) and \
+               self.plug.duplicates(other.plug)
 
 
 class CarPartProperty(Entity):
@@ -341,19 +399,23 @@ class CarPartProperty(Entity):
         self.car_part = car_part
         self.amount = randint(0, 50)
         _ = fake
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO car_part_properties " \
-              "(wid, trade_name, pid, amount) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.workshop.id, self.car_part.trade_name, self.car_part.provider.id, self.amount)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO car_part_properties " \
+                  "(wid, trade_name, pid, amount) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.workshop.id, self.car_part.trade_name, self.car_part.provider.id, self.amount)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
-        return self.workshop.dublicates(other.workshop) and \
-               self.car_part.dublicates(other.car_part)
+    def duplicates(self, other):
+        return self.workshop.duplicates(other.workshop) and \
+               self.car_part.duplicates(other.car_part)
 
 
 class OrderPayment(Entity):
@@ -364,18 +426,22 @@ class OrderPayment(Entity):
         self.price = randint(25, 10000)
         self.date_time = get_fake_date_time(fake, start=order.date_time)
         self.order = order
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO order_payment_records " \
-              "(no_of_transaction, did, pid, oid, price, date_time) " \
-              "VALUES (%s, %s, %s, %s, %s, %s)"
-        val = (self.transaction, self.deposit.id, self.provider.id,
-               self.order.id, self.price, getstr(self.date_time))
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO order_payment_records " \
+                  "(no_of_transaction, did, pid, oid, price, date_time) " \
+                  "VALUES (%s, %s, %s, %s, %s, %s)"
+            val = (self.transaction, self.deposit.id, self.provider.id,
+                   self.order.id, self.price, getstr(self.date_time))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
+    def duplicates(self, other):
         return self.transaction == other.transaction
 
 
@@ -384,18 +450,22 @@ class StationSockets(Entity):
         self.station = station
         self.no_of_available_sockets = randint(0, station.total_no_of_sockets)
         self.date_time = get_fake_date_time(fake, end=datetime(2018, 9, 1))
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO charging_station_sockets " \
-              "(station_id, no_of_available_sockets, date_time) " \
-              "VALUES (%s, %s, %s)"
-        val = (self.station.id, self.no_of_available_sockets, getstr(self.date_time))
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO charging_station_sockets " \
+                  "(station_id, no_of_available_sockets, date_time) " \
+                  "VALUES (%s, %s, %s)"
+            val = (self.station.id, self.no_of_available_sockets, getstr(self.date_time))
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
-        return self.station.dublicates(other.station) and \
+    def duplicates(self, other):
+        return self.station.duplicates(other.station) and \
                self.date_time == other.date_time
 
 
@@ -405,16 +475,20 @@ class OrderDetails(Entity):
         self.car_part = car_part
         self.amount = randint(1, 10)
         _ = fake
+        self.inserted = False
 
     def save(self, conn: MySQLConnection):
-        cursor = conn.cursor()
-        sql = "INSERT INTO order_details " \
-              "(order_id, trade_name, pid, amount) " \
-              "VALUES (%s, %s, %s, %s)"
-        val = (self.order.id, self.car_part.trade_name,
-               self.car_part.provider.id, self.amount)
-        cursor.execute(sql, val)
-        conn.commit()
+        if not self.inserted:
+            cursor = conn.cursor()
+            sql = "INSERT INTO order_details " \
+                  "(order_id, trade_name, pid, amount) " \
+                  "VALUES (%s, %s, %s, %s)"
+            val = (self.order.id, self.car_part.trade_name,
+                   self.car_part.provider.id, self.amount)
+            cursor.execute(sql, val)
+            cursor.close()
+            conn.commit()
+            self.inserted = True
 
-    def dublicates(self, other):
-        return self.car_part.dublicates(other.car_part)
+    def duplicates(self, other):
+        return self.car_part.duplicates(other.car_part)
