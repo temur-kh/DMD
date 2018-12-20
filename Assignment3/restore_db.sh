@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-mysql -u root -ptest company < dump.sql
+cat dump.sql | docker exec -i mysql_container_name /usr/bin/mysql -u root --password=test company
